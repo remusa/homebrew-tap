@@ -54,13 +54,13 @@ jobs:
           # Replace 'VERSION' in the template with the actual version number
           URL=$(echo "${{ matrix.url_template }}" | sed "s/VERSION/$VERSION/g")
 
-          echo "Downloading $URL..."
+          echo "Updating ${{ matrix.name }} to v$VERSION..."
 
-          # 1. Download and calculate SHA256 (with error check)
+          # 1. Download and calculate SHA256
           NEW_SHA=$(curl -L -s "$URL" | shasum -a 256 | awk '{print $1}')
 
           if [ -z "$NEW_SHA" ] || [ "$NEW_SHA" == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" ]; then
-            echo "Error: Download failed or file is empty (Empty SHA detected)."
+            echo "Error: Download failed or file is empty."
             exit 1
           fi
 
@@ -68,9 +68,16 @@ jobs:
           sed -i '' "s/version \".*\"/version \"$VERSION\"/" ${{ matrix.file }}
           sed -i '' "s/sha256 \".*\"/sha256 \"$NEW_SHA\"/" ${{ matrix.file }}
 
-          # 3. Commit and Push
+          # 3. Commit and Push ONLY if changes were made
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add ${{ matrix.file }}
-          git commit -m "Update ${{ matrix.name }} to v$VERSION"
-          git push origin master
+
+          # Check if there are staged changes
+          if git diff --cached --quiet; then
+            echo "No changes detected for ${{ matrix.name }}. Skipping commit."
+          else
+            echo "Changes detected. Committing..."
+            git commit -m "Update ${{ matrix.name }} to v$VERSION"
+            git push origin master
+          fi
