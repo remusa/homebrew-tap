@@ -4,7 +4,9 @@ cask("shiru") do
 
   url("https://github.com/RockinChaos/Shiru/releases/download/v#{version}/mac-Shiru-v#{version}.dmg")
   name("Shiru")
-  desc("Specialized audio/visual tool")
+  desc(
+    " A personal anime library manager for watching and tracking your collection in real time. Lightweight, powerful, and paws-itively fast. No waiting required!"
+  )
   homepage("https://github.com/RockinChaos/Shiru")
 
   livecheck do
