@@ -21,16 +21,23 @@ jobs:
         env:
           HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.HOMEBREW_BUMP_TOKEN }}
         run: |
-          # 1. Get the latest version using livecheck
-          LATEST_VERSION=$(brew livecheck shiru --json | jq -r '.[0].livecheck.version.latest')
+          # 1. Force Homebrew to recognize the local Cask file
+          # We point directly to the file to ensure livecheck finds it
+          LATEST_VERSION=$(brew livecheck --json --quiet Casks/shiru.rb | jq -r '.[0].livecheck.version.latest')
+
           echo "Latest version found: $LATEST_VERSION"
 
-          # 2. Use the built-in bump command
-          # --force tells it to commit directly if everything looks good
-          # --no-audit skips strict formatting checks to speed things up
+          # Check if we actually got a version string
+          if [ "$LATEST_VERSION" == "null" ] || [ -z "$LATEST_VERSION" ]; then
+            echo "Error: Could not determine latest version."
+            exit 1
+          fi
+
+          # 2. Run the bump
+          # Removed --online and added --no-audit
           brew bump-cask-pr \
             --version="$LATEST_VERSION" \
             --no-audit \
-            --online \
+            --no-style \
             --force \
-            shiru
+            Casks/shiru.rb
