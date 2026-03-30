@@ -11,6 +11,7 @@ jobs:
       - name: Checkout Tap
         uses: actions/checkout@v4
         with:
+          # This connects the token to the checkout so git push works
           token: ${{ secrets.HOMEBREW_BUMP_TOKEN }}
 
       - name: Check for New Version
@@ -18,39 +19,40 @@ jobs:
         run: |
           # 1. Get the latest version tag from GitHub API
           LATEST_VERSION=$(curl -s https://api.github.com/repos/RockinChaos/Shiru/releases/latest | jq -r '.tag_name' | sed 's/v//')
-          echo "latest_version=$LATEST_VERSION" >> $GITHUB_OUTPUT
 
-          # 2. Get the current version from the Ruby file
-          CURRENT_VERSION=$(grep 'version "' Casks/shiru.rb | cut -d '"' -f 2)
+          # 2. Get the current version from your local Ruby file
+          CURRENT_VERSION=$(grep 'version "' Casks/shiru.rb | head -n 1 | cut -d '"' -f 2)
 
-          if [ "$LATEST_VERSION" = "$CURRENT_VERSION" ]; then
-            echo "Already up to date ($CURRENT_VERSION). Skipping."
-            echo "update_needed=false" >> $GITHUB_OUTPUT
-          else
-            echo "New version found: $LATEST_VERSION (Current: $CURRENT_VERSION)"
+          echo "Latest on GitHub: $LATEST_VERSION"
+          echo "Current in Repo: $CURRENT_VERSION"
+
+          if [ "$LATEST_VERSION" != "$CURRENT_VERSION" ] && [ "$LATEST_VERSION" != "null" ]; then
             echo "update_needed=true" >> $GITHUB_OUTPUT
+            echo "version=$LATEST_VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "update_needed=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Update File and Push
         if: steps.check.outputs.update_needed == 'true'
         run: |
-          VERSION="${{ steps.check.outputs.latest_version }}"
+          VERSION="${{ steps.check.outputs.version }}"
           URL="https://github.com/RockinChaos/Shiru/releases/download/v${VERSION}/mac-Shiru-v${VERSION}.dmg"
 
-          # 1. Download the new DMG and calculate SHA256
-          echo "Downloading $URL..."
+          echo "Updating to v$VERSION..."
+
+          # 1. Download and calculate SHA256
           NEW_SHA=$(curl -L -s "$URL" | shasum -a 256 | awk '{print $1}')
           echo "New SHA: $NEW_SHA"
 
-          # 2. Update the Ruby file using sed
-          # Update version string
+          # 2. Update the Ruby file
+          # We use -i '' for macOS sed compatibility
           sed -i '' "s/version \".*\"/version \"$VERSION\"/" Casks/shiru.rb
-          # Update sha256 string
           sed -i '' "s/sha256 \".*\"/sha256 \"$NEW_SHA\"/" Casks/shiru.rb
 
-          # 3. Commit and Push back to your repo
+          # 3. Commit and Push
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add Casks/shiru.rb
           git commit -m "Update Shiru to v$VERSION"
-          git push
+          git push origin master
