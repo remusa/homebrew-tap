@@ -1,8 +1,9 @@
 cask "shiru" do
-  version "6.5.1"
-  sha256 "302a5051ea5ff5ba545e8ad7a224ad31b4ddfcbb26af0e30f05efbcc0faf739e"
+  version "6.5.2"
+  sha256 "0734a17960307c89f5597968600889241b617066f1969963e7b1735155f98592"
 
-  url "https://github.com/RockinChaos/Shiru/releases/download/v#{version}/Shiru-macOS.dmg"
+  # Updated to match the new "mac-Shiru-v{version}.dmg" format
+  url "https://github.com/RockinChaos/Shiru/releases/download/v#{version}/mac-Shiru-v#{version}.dmg"
   name "Shiru"
   desc "Specialized audio/visual tool"
   homepage "https://github.com/RockinChaos/Shiru"
@@ -14,7 +15,7 @@ cask "shiru" do
 
   app "Shiru.app"
 
-     zap trash: [
+  zap trash: [
     "~/Library/Application Support/Shiru",
     "~/Library/Preferences/com.rockinchaos.shiru.plist",
   ]
