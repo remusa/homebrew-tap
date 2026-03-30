@@ -8,24 +8,22 @@ jobs:
   update-apps:
     runs-on: macos-latest
     strategy:
-      fail-fast: false # Don't stop if one app fails
+      fail-fast: false
       matrix:
         include:
           - name: librewolf
             api_url: "https://codeberg.org/api/v1/repos/librewolf/bsys6/releases/latest"
             file: Casks/librewolf.rb
             url_template: "https://codeberg.org/api/packages/librewolf/generic/librewolf/VERSION/librewolf-VERSION-macos-arm64-package.dmg"
-
+          
           - name: shiru
-            repo: RockinChaos/Shiru
+            api_url: "https://api.github.com/repos/RockinChaos/Shiru/releases/latest"
             file: Casks/shiru.rb
-            # Pattern: v6.5.2/mac-Shiru-v6.5.2.dmg
             url_template: "https://github.com/RockinChaos/Shiru/releases/download/vVERSION/mac-Shiru-vVERSION.dmg"
 
           - name: mangayomi
-            repo: kodjodevf/mangayomi
+            api_url: "https://api.github.com/repos/kodjodevf/mangayomi/releases/latest"
             file: Casks/mangayomi.rb
-            # Pattern: v0.7.3/Mangayomi-v0.7.3-macos.dmg
             url_template: "https://github.com/kodjodevf/mangayomi/releases/download/vVERSION/Mangayomi-vVERSION-macos.dmg"
 
     steps:
