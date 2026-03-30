@@ -7,9 +7,14 @@ cask "shiru" do
   desc "Specialized audio/visual tool"
   homepage "https://github.com/RockinChaos/Shiru"
 
+  livecheck do
+    url "https://github.com/RockinChaos/Shiru/releases/latest"
+    strategy :github_latest
+  end
+
   app "Shiru.app"
 
-  zap trash: [
+     zap trash: [
     "~/Library/Application Support/Shiru",
     "~/Library/Preferences/com.rockinchaos.shiru.plist",
   ]
