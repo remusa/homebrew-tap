@@ -1,5 +1,5 @@
 cask "shiru" do
-  version "6.5.1"
+  version "6.5.2"
   sha256 "3f65324e5236ce037db66a76b5c6c4a25565fbeba0f00d0139f02bfabbf3ca51"
 
   # Updated to match the new "mac-Shiru-v{version}.dmg" format
