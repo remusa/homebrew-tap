@@ -5,44 +5,52 @@ on:
   workflow_dispatch:
 
 jobs:
-  homebrew-bump:
+  update-cask:
     runs-on: macos-latest
     steps:
       - name: Checkout Tap
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.HOMEBREW_BUMP_TOKEN }}
 
-      - name: Manual Tap Link
+      - name: Check for New Version
+        id: check
         run: |
-          # Create the path where Homebrew expects taps to live
-          TAPS_DIR=$(brew --repository)/Library/Taps/remusa
-          mkdir -p "$TAPS_DIR"
+          # 1. Get the latest version tag from GitHub API
+          LATEST_VERSION=$(curl -s https://api.github.com/repos/RockinChaos/Shiru/releases/latest | jq -r '.tag_name' | sed 's/v//')
+          echo "latest_version=$LATEST_VERSION" >> $GITHUB_OUTPUT
 
-          # Symlink your current workspace into that directory
-          ln -s "$GITHUB_WORKSPACE" "$TAPS_DIR/homebrew-tap"
+          # 2. Get the current version from the Ruby file
+          CURRENT_VERSION=$(grep 'version "' Casks/shiru.rb | cut -d '"' -f 2)
 
-          # Verify Homebrew sees it
-          brew tap
-
-      - name: Bump Cask
-        env:
-          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.HOMEBREW_BUMP_TOKEN }}
-        run: |
-          # 1. Get the latest version using the formal tap name
-          LATEST_VERSION=$(brew livecheck remusa/tap/shiru --json --quiet | jq -r '.[0].livecheck.version.latest')
-
-          echo "Latest version found: $LATEST_VERSION"
-
-          # 2. Safety check
-          if [ "$LATEST_VERSION" == "null" ] || [ -z "$LATEST_VERSION" ]; then
-            echo "Error: Could not determine latest version."
-            exit 1
+          if [ "$LATEST_VERSION" = "$CURRENT_VERSION" ]; then
+            echo "Already up to date ($CURRENT_VERSION). Skipping."
+            echo "update_needed=false" >> $GITHUB_OUTPUT
+          else
+            echo "New version found: $LATEST_VERSION (Current: $CURRENT_VERSION)"
+            echo "update_needed=true" >> $GITHUB_OUTPUT
           fi
 
-          # 3. Run the bump
-          # We use the full name so Homebrew knows exactly which repo to commit to
-          brew bump-cask-pr \
-            --version="$LATEST_VERSION" \
-            --no-audit \
-            --no-style \
-            --force \
-            remusa/tap/shiru
+      - name: Update File and Push
+        if: steps.check.outputs.update_needed == 'true'
+        run: |
+          VERSION="${{ steps.check.outputs.latest_version }}"
+          URL="https://github.com/RockinChaos/Shiru/releases/download/v${VERSION}/mac-Shiru-v${VERSION}.dmg"
+
+          # 1. Download the new DMG and calculate SHA256
+          echo "Downloading $URL..."
+          NEW_SHA=$(curl -L -s "$URL" | shasum -a 256 | awk '{print $1}')
+          echo "New SHA: $NEW_SHA"
+
+          # 2. Update the Ruby file using sed
+          # Update version string
+          sed -i '' "s/version \".*\"/version \"$VERSION\"/" Casks/shiru.rb
+          # Update sha256 string
+          sed -i '' "s/sha256 \".*\"/sha256 \"$NEW_SHA\"/" Casks/shiru.rb
+
+          # 3. Commit and Push back to your repo
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add Casks/shiru.rb
+          git commit -m "Update Shiru to v$VERSION"
+          git push
