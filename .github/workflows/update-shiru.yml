@@ -1,13 +1,19 @@
 name: Update Shiru Cask
 on:
   schedule:
-    - cron: "0 0 * * *" # Runs every day at midnight
-  workflow_dispatch: # Allows you to run it manually from the "Actions" tab
+    - cron: "0 0 * * *"
+  workflow_dispatch:
 
 jobs:
   homebrew-bump:
     runs-on: macos-latest
     steps:
+      # FIX: Ensure Homebrew is ready and has its developer dependencies
+      - name: Set up Homebrew
+        run: |
+          brew update
+          brew install-bundler-gems
+
       - name: Update Shiru Cask
         uses: macauley/action-homebrew-bump-cask@v1
         with:
@@ -15,3 +21,4 @@ jobs:
           cask: shiru
           tap: remusa/tap
           livecheck: true
+          force: true
