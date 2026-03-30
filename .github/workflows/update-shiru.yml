@@ -21,23 +21,27 @@ jobs:
         env:
           HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.HOMEBREW_BUMP_TOKEN }}
         run: |
-          # 1. Force Homebrew to recognize the local Cask file
-          # We point directly to the file to ensure livecheck finds it
-          LATEST_VERSION=$(brew livecheck --json --quiet Casks/shiru.rb | jq -r '.[0].livecheck.version.latest')
+          # 1. Register the current directory as your tap
+          # This is the "magic link" Homebrew needs
+          brew tap remusa/tap .
+
+          # 2. Get the latest version
+          # Now we can refer to it by its short name because it's properly tapped
+          LATEST_VERSION=$(brew livecheck remusa/tap/shiru --json --quiet | jq -r '.[0].livecheck.version.latest')
 
           echo "Latest version found: $LATEST_VERSION"
 
-          # Check if we actually got a version string
+          # Safety check
           if [ "$LATEST_VERSION" == "null" ] || [ -z "$LATEST_VERSION" ]; then
-            echo "Error: Could not determine latest version."
+            echo "Error: Could not determine latest version. Check the livecheck block in shiru.rb."
             exit 1
           fi
 
-          # 2. Run the bump
-          # Removed --online and added --no-audit
+          # 3. Run the bump
+          # Using the full tap name ensures the script knows where to save the changes
           brew bump-cask-pr \
             --version="$LATEST_VERSION" \
             --no-audit \
             --no-style \
             --force \
-            Casks/shiru.rb
+            remusa/tap/shiru
