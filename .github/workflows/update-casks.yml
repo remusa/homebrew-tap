@@ -4,60 +4,71 @@ on:
     - cron: "0 0 * * *"
   workflow_dispatch:
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   update-apps:
     runs-on: macos-latest
     strategy:
+      fail-fast: false # Don't stop if one app fails
       matrix:
-        # Add more apps here easily in the future!
         include:
           - name: shiru
             repo: RockinChaos/Shiru
             file: Casks/shiru.rb
-            url_pattern: "v${VERSION}/mac-Shiru-v${VERSION}.dmg"
+            # Pattern: v6.5.2/mac-Shiru-v6.5.2.dmg
+            url_template: "https://github.com/RockinChaos/Shiru/releases/download/vVERSION/mac-Shiru-vVERSION.dmg"
+
           - name: mangayomi
             repo: kodjodevf/mangayomi
             file: Casks/mangayomi.rb
-            url_pattern: "v${VERSION}/Mangayomi-v${VERSION}-macos.dmg"
+            # Pattern: v0.7.3/Mangayomi-v0.7.3-macos.dmg
+            url_template: "https://github.com/kodjodevf/mangayomi/releases/download/vVERSION/Mangayomi-vVERSION-macos.dmg"
 
     steps:
       - name: Checkout Tap
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.HOMEBREW_BUMP_TOKEN }}
 
-      - name: Check for ${{ matrix.name }} Version
+      - name: Check Version
         id: check
         run: |
           LATEST_VERSION=$(curl -s -H "Authorization: token ${{ secrets.HOMEBREW_BUMP_TOKEN }}" \
+            -H "User-Agent: Homebrew-Update-Action" \
             https://api.github.com/repos/${{ matrix.repo }}/releases/latest | jq -r '.tag_name' | sed 's/v//')
 
           CURRENT_VERSION=$(grep 'version "' ${{ matrix.file }} | head -n 1 | cut -d '"' -f 2)
 
-          echo "Latest: $LATEST_VERSION | Current: $CURRENT_VERSION"
+          echo "App: ${{ matrix.name }} | Latest: $LATEST_VERSION | Current: $CURRENT_VERSION"
 
-          if [ "$LATEST_VERSION" != "$CURRENT_VERSION" ] && [ "$LATEST_VERSION" != "null" ]; then
+          if [ "$LATEST_VERSION" != "null" ] && [ "$LATEST_VERSION" != "$CURRENT_VERSION" ]; then
             echo "update_needed=true" >> $GITHUB_OUTPUT
             echo "version=$LATEST_VERSION" >> $GITHUB_OUTPUT
           else
             echo "update_needed=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Update ${{ matrix.name }}
+      - name: Update and Push
         if: steps.check.outputs.update_needed == 'true'
         run: |
           VERSION="${{ steps.check.outputs.version }}"
-          # Construct the URL based on the matrix pattern
-          URL="https://github.com/${{ matrix.repo }}/releases/download/${{ matrix.url_pattern }}"
+          # Replace 'VERSION' in the template with the actual version number
+          URL=$(echo "${{ matrix.url_template }}" | sed "s/VERSION/$VERSION/g")
 
+          echo "Downloading $URL..."
+
+          # 1. Download and calculate SHA256 (with error check)
           NEW_SHA=$(curl -L -s "$URL" | shasum -a 256 | awk '{print $1}')
 
+          if [ -z "$NEW_SHA" ] || [ "$NEW_SHA" == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" ]; then
+            echo "Error: Download failed or file is empty (Empty SHA detected)."
+            exit 1
+          fi
+
+          # 2. Update the file
           sed -i '' "s/version \".*\"/version \"$VERSION\"/" ${{ matrix.file }}
           sed -i '' "s/sha256 \".*\"/sha256 \"$NEW_SHA\"/" ${{ matrix.file }}
 
+          # 3. Commit and Push
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add ${{ matrix.file }}
