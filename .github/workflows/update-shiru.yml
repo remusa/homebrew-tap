@@ -11,33 +11,38 @@ jobs:
       - name: Checkout Tap
         uses: actions/checkout@v4
 
-      - name: Set up Homebrew
+      - name: Manual Tap Link
         run: |
-          brew update
-          # Ensure the tap is linked locally in the runner
-          brew tap remusa/tap .
+          # Create the path where Homebrew expects taps to live
+          TAPS_DIR=$(brew --repository)/Library/Taps/remusa
+          mkdir -p "$TAPS_DIR"
+
+          # Symlink your current workspace into that directory
+          ln -s "$GITHUB_WORKSPACE" "$TAPS_DIR/homebrew-tap"
+
+          # Verify Homebrew sees it
+          brew tap
 
       - name: Bump Cask
         env:
           HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.HOMEBREW_BUMP_TOKEN }}
         run: |
-          # 1. Get the latest version by pointing directly to the file
-          # We use --full-name to help livecheck identify the cask context
-          LATEST_VERSION=$(brew livecheck --json --quiet ./Casks/shiru.rb | jq -r '.[0].livecheck.version.latest')
+          # 1. Get the latest version using the formal tap name
+          LATEST_VERSION=$(brew livecheck remusa/tap/shiru --json --quiet | jq -r '.[0].livecheck.version.latest')
 
           echo "Latest version found: $LATEST_VERSION"
 
           # 2. Safety check
           if [ "$LATEST_VERSION" == "null" ] || [ -z "$LATEST_VERSION" ]; then
-            echo "Error: Could not determine latest version. Ensure 'livecheck' block exists in Casks/shiru.rb"
+            echo "Error: Could not determine latest version."
             exit 1
           fi
 
-          # 3. Run the bump using the file path
-          # We use --version to specify the target and point to the file
+          # 3. Run the bump
+          # We use the full name so Homebrew knows exactly which repo to commit to
           brew bump-cask-pr \
             --version="$LATEST_VERSION" \
             --no-audit \
             --no-style \
             --force \
-            ./Casks/shiru.rb
+            remusa/tap/shiru
