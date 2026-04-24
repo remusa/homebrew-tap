@@ -26,6 +26,11 @@ jobs:
             file: Casks/mangayomi.rb
             url_template: "https://github.com/kodjodevf/mangayomi/releases/download/vVERSION/Mangayomi-vVERSION-macos.dmg"
 
+          - name: openmessage
+            api_url: "https://api.github.com/repos/MaxGhenis/openmessage/releases/latest"
+            file: Casks/openmessage.rb
+            url_template: "https://github.com/MaxGhenis/openmessage/releases/download/vVERSION/OpenMessage.dmg"
+
     steps:
       - name: Checkout Tap
         uses: actions/checkout@v5
