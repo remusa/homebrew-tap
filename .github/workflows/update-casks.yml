@@ -78,10 +78,13 @@ jobs:
           sed -i '' "s/version \".*\"/version \"$VERSION\"/" ${{ matrix.file }}
           sed -i '' "s/sha256 \".*\"/sha256 \"$NEW_SHA\"/" ${{ matrix.file }}
 
-          # 3. Commit and Push ONLY if changes were made
+          # 3. Update versions.json
+          sed -i '' "s/\"${{ matrix.name }}\": \"[^\"]*\"/\"${{ matrix.name }}\": \"$VERSION\"/" versions.json
+
+          # 4. Commit and Push ONLY if changes were made
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git add ${{ matrix.file }}
+          git add ${{ matrix.file }} versions.json
 
           # Check if there are staged changes
           if git diff --cached --quiet; then
