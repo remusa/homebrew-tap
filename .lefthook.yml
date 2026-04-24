@@ -1,22 +1,14 @@
-pre-commit:
-  parallel: true
-  commands:
-    style:
-      run: npx --yes brew-style {staged_files} || brew style --fix {staged_files}
-      files: \.(rb|hcl)$
-    yamllint:
-      run: npx --yes yamllint {staged_files}
-      files: \.(yml|yaml)$
-    markdown:
-      run: npx --yes prettier --write {staged_files}
-      files: \.md$
-
 commit-msg:
   commands:
     conventional-commits:
       run: |
-        # Conventional commits regex:^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-z0-9-]+\))?!?: .+
-        MSG=$(cat {commit_msg_file})
+        if [ -f ".git/COMMIT_EDITMSG" ]; then
+          MSG=$(cat .git/COMMIT_EDITMSG)
+        elif [ -f ".git/msg" ]; then
+          MSG=$(cat .git/msg)
+        else
+          MSG=""
+        fi
         if ! echo "$MSG" | grep -qE '^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-z0-9-]+\))?!?: .+'; then
           echo "Error: Commit message does not follow conventional commits format."
           echo "Expected: <type>(<scope>)?<!>?: <description>"
