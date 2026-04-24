@@ -7,6 +7,12 @@ pre-commit:
     yamllint:
       run: mise exec -- yamllint --no-warnings {staged_files}
       glob: "*.{yml,yaml}"
+    toml:
+      run: mise exec -- taplo fmt {staged_files}
+      glob: "*.toml"
+    shell:
+      run: mise exec -- shfmt -w {staged_files}
+      glob: "*.sh"
     markdown:
       run: npx --yes prettier --write {staged_files}
       glob: "*.md"
