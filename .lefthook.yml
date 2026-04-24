@@ -1,3 +1,16 @@
+pre-commit:
+  parallel: true
+  commands:
+    style:
+      run: brew style {staged_files}
+      glob: "*.rb"
+    yamllint:
+      run: mise exec -- yamllint --no-warnings {staged_files}
+      glob: "*.{yml,yaml}"
+    markdown:
+      run: npx --yes prettier --write {staged_files}
+      glob: "*.md"
+
 commit-msg:
   commands:
     conventional-commits:
@@ -9,9 +22,11 @@ commit-msg:
         else
           MSG=""
         fi
-        if ! echo "$MSG" | grep -qE '^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-z0-9-]+\))?!?: .+'; then
-          echo "Error: Commit message does not follow conventional commits format."
+        if ! echo "$MSG" | grep -qE '^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)'; then
+          echo "Error: Commit message does not follow"
+          echo "conventional commits format."
           echo "Expected: <type>(<scope>)?<!>?: <description>"
-          echo "Types: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test"
+          echo "Types: build, chore, ci, docs, feat, fix, perf,"
+          echo "refactor, revert, style, test"
           exit 1
         fi

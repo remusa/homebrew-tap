@@ -1,2 +1,4 @@
 [tools]
 lefthook = "latest"
+yamllint = "latest"
+prettier = "latest"
