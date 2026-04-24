@@ -2,3 +2,5 @@
 lefthook = "latest"
 yamllint = "latest"
 prettier = "latest"
+taplo = "latest"
+shfmt = "latest"
