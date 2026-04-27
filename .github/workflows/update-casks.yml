@@ -14,22 +14,18 @@ jobs:
             api_url: "https://codeberg.org/api/v1/repos/librewolf/bsys6/releases/latest"
             file: Casks/librewolf.rb
             url_template: "https://codeberg.org/api/packages/librewolf/generic/librewolf/VERSION/librewolf-VERSION-macos-arm64-package.dmg"
-
           - name: shiru
             api_url: "https://api.github.com/repos/RockinChaos/Shiru/releases/latest"
             file: Casks/shiru.rb
             url_template: "https://github.com/RockinChaos/Shiru/releases/download/vVERSION/mac-Shiru-vVERSION.dmg"
-
           - name: mangayomi
             api_url: "https://api.github.com/repos/kodjodevf/mangayomi/releases/latest"
             file: Casks/mangayomi.rb
             url_template: "https://github.com/kodjodevf/mangayomi/releases/download/vVERSION/Mangayomi-vVERSION-macos.dmg"
-
           - name: openmessage
             api_url: "https://api.github.com/repos/MaxGhenis/openmessage/releases/latest"
             file: Casks/openmessage.rb
             url_template: "https://github.com/MaxGhenis/openmessage/releases/download/vVERSION/OpenMessage.dmg"
-
           - name: betterbird
             api_url: "https://www.betterbird.eu/downloads/getloc.php?os=mac-arm64&lang=en-US&version=release"
             file: Casks/betterbird.rb
@@ -40,7 +36,6 @@ jobs:
         uses: actions/checkout@v5
         with:
           token: ${{ secrets.HOMEBREW_BUMP_TOKEN }}
-
       - name: Check Version
         id: check
         run: |
@@ -61,7 +56,6 @@ jobs:
           else
             echo "update_needed=false" >> $GITHUB_OUTPUT
           fi
-
       - name: Update and Push
         if: steps.check.outputs.update_needed == 'true'
         run: |
@@ -81,8 +75,8 @@ jobs:
               exit 1
             fi
             sed -i '' "s/version(\".*\")/version(\"$VERSION\")/" ${{ matrix.file }}
-            sed -i '' "/on_arm/,/end/{s/sha256(\".*\")/sha256(\"$SHA_ARM64\")/}" ${{ matrix.file }}
-            sed -i '' "/on_intel/,/end/{s/sha256(\".*\")/sha256(\"$SHA_INTEL\")/}" ${{ matrix.file }}
+            perl -i '' -0pe "s/(on_arm\s+do.*?sha256\(\")[^\"]*(\")/\${1}$SHA_ARM64\${2}/s" ${{ matrix.file }}
+            perl -i '' -0pe "s/(on_intel\s+do.*?sha256\(\")[^\"]*(\")/\${1}$SHA_INTEL\${2}/s" ${{ matrix.file }}
           else
             URL=$(echo "${{ matrix.url_template }}" | sed "s/VERSION/$VERSION/g")
             NEW_SHA=$(curl -L -s "$URL" | shasum -a 256 | awk '{print $1}')
