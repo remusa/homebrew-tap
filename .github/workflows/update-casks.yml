@@ -3,7 +3,6 @@ on:
   schedule:
     - cron: "0 0 * * *"
   workflow_dispatch:
-
 jobs:
   update-apps:
     runs-on: macos-latest
@@ -15,7 +14,7 @@ jobs:
             api_url: "https://codeberg.org/api/v1/repos/librewolf/bsys6/releases/latest"
             file: Casks/librewolf.rb
             url_template: "https://codeberg.org/api/packages/librewolf/generic/librewolf/VERSION/librewolf-VERSION-macos-arm64-package.dmg"
-          
+
           - name: shiru
             api_url: "https://api.github.com/repos/RockinChaos/Shiru/releases/latest"
             file: Casks/shiru.rb
@@ -31,6 +30,11 @@ jobs:
             file: Casks/openmessage.rb
             url_template: "https://github.com/MaxGhenis/openmessage/releases/download/vVERSION/OpenMessage.dmg"
 
+          - name: betterbird
+            api_url: "https://www.betterbird.eu/downloads/getloc.php?os=mac-arm64&lang=en-US&version=release"
+            file: Casks/betterbird.rb
+            url_template_arm64: "https://www.betterbird.eu/downloads/MacDiskImage/betterbird-VERSION.en-US.mac-arm64.dmg"
+            url_template_intel: "https://www.betterbird.eu/downloads/MacDiskImage/betterbird-VERSION.en-US.mac.dmg"
     steps:
       - name: Checkout Tap
         uses: actions/checkout@v5
@@ -40,16 +44,17 @@ jobs:
       - name: Check Version
         id: check
         run: |
-          # Detect if we need GitHub Token or no auth (Codeberg)
-          if [[ "${{ matrix.api_url }}" == *"github.com"* ]]; then
+          if [[ "${{ matrix.name }}" == "betterbird" ]]; then
+            DOWNLOAD_URL=$(curl -s "${{ matrix.api_url }}")
+            LATEST_VERSION=$(basename "$DOWNLOAD_URL" | sed 's/betterbird-//' | sed 's/\.en-US.*//')
+          elif [[ "${{ matrix.api_url }}" == *"github.com"* ]]; then
             RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.HOMEBREW_BUMP_TOKEN }}" ${{ matrix.api_url }})
+            LATEST_VERSION=$(echo "$RESPONSE" | jq -r '.tag_name' | sed 's/v//')
           else
             RESPONSE=$(curl -s ${{ matrix.api_url }})
+            LATEST_VERSION=$(echo "$RESPONSE" | jq -r '.tag_name' | sed 's/v//')
           fi
-
-          LATEST_VERSION=$(echo "$RESPONSE" | jq -r '.tag_name' | sed 's/v//')
           CURRENT_VERSION=$(grep 'version "' ${{ matrix.file }} | head -n 1 | cut -d '"' -f 2)
-
           if [ "$LATEST_VERSION" != "null" ] && [ "$LATEST_VERSION" != "$CURRENT_VERSION" ]; then
             echo "update_needed=true" >> $GITHUB_OUTPUT
             echo "version=$LATEST_VERSION" >> $GITHUB_OUTPUT
@@ -61,36 +66,40 @@ jobs:
         if: steps.check.outputs.update_needed == 'true'
         run: |
           VERSION="${{ steps.check.outputs.version }}"
-          # Replace 'VERSION' in the template with the actual version number
-          URL=$(echo "${{ matrix.url_template }}" | sed "s/VERSION/$VERSION/g")
-
           echo "Updating ${{ matrix.name }} to v$VERSION..."
-
-          # 1. Download and calculate SHA256
-          NEW_SHA=$(curl -L -s "$URL" | shasum -a 256 | awk '{print $1}')
-
-          if [ -z "$NEW_SHA" ] || [ "$NEW_SHA" == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" ]; then
-            echo "Error: Download failed or file is empty."
-            exit 1
+          if [[ "${{ matrix.name }}" == "betterbird" ]]; then
+            URL_ARM64=$(echo "${{ matrix.url_template_arm64 }}" | sed "s/VERSION/$VERSION/g")
+            URL_INTEL=$(echo "${{ matrix.url_template_intel }}" | sed "s/VERSION/$VERSION/g")
+            SHA_ARM64=$(curl -L -s "$URL_ARM64" | shasum -a 256 | awk '{print $1}')
+            SHA_INTEL=$(curl -L -s "$URL_INTEL" | shasum -a 256 | awk '{print $1}')
+            if [ -z "$SHA_ARM64" ] || [ "$SHA_ARM64" == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" ]; then
+              echo "Error: arm64 download failed or file is empty."
+              exit 1
+            fi
+            if [ -z "$SHA_INTEL" ] || [ "$SHA_INTEL" == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" ]; then
+              echo "Error: intel download failed or file is empty."
+              exit 1
+            fi
+            sed -i '' "s/version(\".*\")/version(\"$VERSION\")/" ${{ matrix.file }}
+            sed -i '' "/on_arm/,/end/{s/sha256(\".*\")/sha256(\"$SHA_ARM64\")/}" ${{ matrix.file }}
+            sed -i '' "/on_intel/,/end/{s/sha256(\".*\")/sha256(\"$SHA_INTEL\")/}" ${{ matrix.file }}
+          else
+            URL=$(echo "${{ matrix.url_template }}" | sed "s/VERSION/$VERSION/g")
+            NEW_SHA=$(curl -L -s "$URL" | shasum -a 256 | awk '{print $1}')
+            if [ -z "$NEW_SHA" ] || [ "$NEW_SHA" == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" ]; then
+              echo "Error: Download failed or file is empty."
+              exit 1
+            fi
+            sed -i '' "s/version \".*\"/version \"$VERSION\"/" ${{ matrix.file }}
+            sed -i '' "s/sha256 \".*\"/sha256 \"$NEW_SHA\"/" ${{ matrix.file }}
           fi
-
-          # 2. Update the file
-          sed -i '' "s/version \".*\"/version \"$VERSION\"/" ${{ matrix.file }}
-          sed -i '' "s/sha256 \".*\"/sha256 \"$NEW_SHA\"/" ${{ matrix.file }}
-
-          # 3. Update versions.json
           sed -i '' "s/\"${{ matrix.name }}\": \"[^\"]*\"/\"${{ matrix.name }}\": \"$VERSION\"/" versions.json
-
-          # 4. Commit and Push ONLY if changes were made
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add ${{ matrix.file }} versions.json
-
-          # Check if there are staged changes
           if git diff --cached --quiet; then
             echo "No changes detected for ${{ matrix.name }}. Skipping commit."
           else
-            echo "Changes detected. Committing..."
             git commit -m "Update ${{ matrix.name }} to v$VERSION"
             git push origin master
           fi
