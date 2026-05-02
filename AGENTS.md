@@ -9,6 +9,7 @@ When adding application `<app-name>`:
 ### 1. Create the Cask or Formula
 
 **For Casks:** Create `Casks/<app-name>.rb`
+
 - Use appropriate template from `.opencode/skills/add-app.md`
 - Set initial version and sha256 (use placeholder if unknown)
 
@@ -17,6 +18,7 @@ When adding application `<app-name>`:
 ### 2. Update Workflow
 
 Edit `.github/workflows/update-casks.yml`:
+
 - Add entry to `matrix.include` section with:
   - `name`: application name
   - `api_url`: release API endpoint
@@ -27,6 +29,7 @@ Edit `.github/workflows/update-casks.yml`:
 ### 3. Update versions.json
 
 Add entry to `versions.json`:
+
 ```json
 {
   "<app-name>": "<initial-version>"
@@ -36,6 +39,7 @@ Add entry to `versions.json`:
 ### 4. Update README.md
 
 Add row to the Casks table:
+
 ```markdown
 | <app-name> | ![](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fremusa%2Fhomebrew-tap%2Fmaster%2Fversions.json&query=%24.<app-name>&label=<app-name>) |
 ```
@@ -43,6 +47,7 @@ Add row to the Casks table:
 ### 5. Commit
 
 Commit all changes:
+
 ```
 git add Casks/<app-name>.rb .github/workflows/update-casks.yml versions.json README.md
 git commit -m "Add <app-name> to tap"
