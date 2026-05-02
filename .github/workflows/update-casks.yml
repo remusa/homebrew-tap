@@ -26,6 +26,10 @@ jobs:
             api_url: "https://api.github.com/repos/MaxGhenis/openmessage/releases/latest"
             file: Casks/openmessage.rb
             url_template: "https://github.com/MaxGhenis/openmessage/releases/download/vVERSION/OpenMessage.dmg"
+          - name: pythonscad
+            api_url: "https://api.github.com/repos/pythonscad/pythonscad/releases/latest"
+            file: Casks/pythonscad.rb
+            url_template: "https://github.com/pythonscad/pythonscad/releases/download/vVERSION/PythonSCAD-vVERSION.dmg"
           - name: betterbird
             api_url: "https://www.betterbird.eu/downloads/getloc.php?os=mac-arm64&lang=en-US&version=release"
             file: Casks/betterbird.rb
@@ -84,8 +88,8 @@ jobs:
               echo "Error: Download failed or file is empty."
               exit 1
             fi
-            sed -i '' "s/version \".*\"/version \"$VERSION\"/" ${{ matrix.file }}
-            sed -i '' "s/sha256 \".*\"/sha256 \"$NEW_SHA\"/" ${{ matrix.file }}
+            sed -i '' "s/version(\".*\")/version(\"$VERSION\")/" ${{ matrix.file }}
+            sed -i '' "s/sha256(\".*\")/sha256(\"$NEW_SHA\")/" ${{ matrix.file }}
           fi
           sed -i '' "s/\"${{ matrix.name }}\": \"[^\"]*\"/\"${{ matrix.name }}\": \"$VERSION\"/" versions.json
           git config user.name "GitHub Actions"
