@@ -45,7 +45,7 @@ jobs:
         run: |
           if [[ "${{ matrix.name }}" == "betterbird" ]]; then
             DOWNLOAD_URL=$(curl -s "${{ matrix.api_url }}" | tr -d ' \n')
-            LATEST_VERSION=$(echo "$DOWNLOAD_URL" | sed -E 's|.*betterbird-([^.]+)\.en-US\.mac.*|\1|')
+            LATEST_VERSION=$(echo "$DOWNLOAD_URL" | sed -E 's|.*betterbird-(.*)\.en-US\.mac.*|\1|')
           elif [[ "${{ matrix.api_url }}" == *"github.com"* ]]; then
             RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.HOMEBREW_BUMP_TOKEN }}" ${{ matrix.api_url }})
             LATEST_VERSION=$(echo "$RESPONSE" | jq -r '.tag_name' | sed 's|v||')
