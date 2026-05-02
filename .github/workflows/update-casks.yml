@@ -48,10 +48,10 @@ jobs:
             LATEST_VERSION=$(echo "$DOWNLOAD_URL" | sed -E 's|.*betterbird-([^.]+)\.en-US\.mac.*|\1|')
           elif [[ "${{ matrix.api_url }}" == *"github.com"* ]]; then
             RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.HOMEBREW_BUMP_TOKEN }}" ${{ matrix.api_url }})
-            LATEST_VERSION=$(echo "$RESPONSE" | jq -r '.tag_name' | sed 's/v//')
+            LATEST_VERSION=$(echo "$RESPONSE" | jq -r '.tag_name' | sed 's|v||')
           else
             RESPONSE=$(curl -s ${{ matrix.api_url }})
-            LATEST_VERSION=$(echo "$RESPONSE" | jq -r '.tag_name' | sed 's/v//')
+            LATEST_VERSION=$(echo "$RESPONSE" | jq -r '.tag_name' | sed 's|v||')
           fi
           CURRENT_VERSION=$(grep 'version "' ${{ matrix.file }} | head -n 1 | cut -d '"' -f 2)
           if [ "$LATEST_VERSION" != "null" ] && [ "$LATEST_VERSION" != "$CURRENT_VERSION" ]; then
@@ -66,8 +66,8 @@ jobs:
           VERSION="${{ steps.check.outputs.version }}"
           echo "Updating ${{ matrix.name }} to v$VERSION..."
           if [[ "${{ matrix.name }}" == "betterbird" ]]; then
-            URL_ARM64=$(echo "${{ matrix.url_template_arm64 }}" | sed "s/VERSION/$VERSION/g")
-            URL_INTEL=$(echo "${{ matrix.url_template_intel }}" | sed "s/VERSION/$VERSION/g")
+            URL_ARM64=$(echo "${{ matrix.url_template_arm64 }}" | sed "s|VERSION|$VERSION|g")
+            URL_INTEL=$(echo "${{ matrix.url_template_intel }}" | sed "s|VERSION|$VERSION|g")
             SHA_ARM64=$(curl -L -s "$URL_ARM64" | shasum -a 256 | awk '{print $1}')
             SHA_INTEL=$(curl -L -s "$URL_INTEL" | shasum -a 256 | awk '{print $1}')
             if [ -z "$SHA_ARM64" ] || [ "$SHA_ARM64" == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" ]; then
@@ -78,20 +78,20 @@ jobs:
               echo "Error: intel download failed or file is empty."
               exit 1
             fi
-            sed -i '' "s/version(\".*\")/version(\"$VERSION\")/" ${{ matrix.file }}
-            perl -i '' -0pe "s/(on_arm\s+do.*?sha256\(\")[^\"]*(\")/\${1}$SHA_ARM64\${2}/s" ${{ matrix.file }}
-            perl -i '' -0pe "s/(on_intel\s+do.*?sha256\(\")[^\"]*(\")/\${1}$SHA_INTEL\${2}/s" ${{ matrix.file }}
+            sed -i '' "s|version(\".*\")|version(\"$VERSION\")|" ${{ matrix.file }}
+            perl -i '' -0pe "s|(on_arm\s+do.*?sha256\(\")[^\"]*(\")|${1}$SHA_ARM64${2}|s" ${{ matrix.file }}
+            perl -i '' -0pe "s|(on_intel\s+do.*?sha256\(\")[^\"]*(\")|${1}$SHA_INTEL${2}|s" ${{ matrix.file }}
           else
-            URL=$(echo "${{ matrix.url_template }}" | sed "s/VERSION/$VERSION/g")
+            URL=$(echo "${{ matrix.url_template }}" | sed "s|VERSION|$VERSION|g")
             NEW_SHA=$(curl -L -s "$URL" | shasum -a 256 | awk '{print $1}')
             if [ -z "$NEW_SHA" ] || [ "$NEW_SHA" == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" ]; then
               echo "Error: Download failed or file is empty."
               exit 1
             fi
-            sed -i '' "s/version(\".*\")/version(\"$VERSION\")/" ${{ matrix.file }}
-            sed -i '' "s/sha256(\".*\")/sha256(\"$NEW_SHA\")/" ${{ matrix.file }}
+            sed -i '' "s|version(\".*\")|version(\"$VERSION\")|" ${{ matrix.file }}
+            sed -i '' "s|sha256(\".*\")|sha256(\"$NEW_SHA\")|" ${{ matrix.file }}
           fi
-          sed -i '' "s/\"${{ matrix.name }}\": \"[^\"]*\"/\"${{ matrix.name }}\": \"$VERSION\"/" versions.json
+          sed -i '' "s|\"${{ matrix.name }}\": \"[^\"]*\"|\"${{ matrix.name }}\": \"$VERSION\"|" versions.json
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add ${{ matrix.file }} versions.json
