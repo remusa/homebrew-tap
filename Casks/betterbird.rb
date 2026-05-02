@@ -1,5 +1,5 @@
 cask("betterbird") do
-  version("140.10.1esr-bb22")
+  version("https://www.betterbird.eu/downloads/MacDiskImage/betterbird-140.10.1esr-bb22.en-US.mac-arm64.dmg")
 
   on_arm do
     # Get via: curl -L https://www.betterbird.eu/downloads/MacDiskImage/betterbird-#{version}.en-US.mac-arm64.dmg | shasum -a 256
