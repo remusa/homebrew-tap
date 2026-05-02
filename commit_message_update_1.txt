@@ -1,0 +1,1 @@
+Commit message updated to follow conventional commits format.
