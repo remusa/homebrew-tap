@@ -99,5 +99,7 @@ jobs:
             echo "No changes detected for ${{ matrix.name }}. Skipping commit."
           else
             git commit -m "Update ${{ matrix.name }} to v$VERSION"
+            git fetch origin master
+            git rebase origin/master
             git push origin master
           fi
