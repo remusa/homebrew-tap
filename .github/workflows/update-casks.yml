@@ -44,8 +44,8 @@ jobs:
         id: check
         run: |
           if [[ "${{ matrix.name }}" == "betterbird" ]]; then
-            DOWNLOAD_URL=$(curl -s "${{ matrix.api_url }}")
-            LATEST_VERSION=$(basename "$DOWNLOAD_URL" | sed 's/betterbird-//' | sed 's/\.en-US.*//')
+            DOWNLOAD_URL=$(curl -s "${{ matrix.api_url }}" | tr -d ' \n')
+            LATEST_VERSION=$(echo "$DOWNLOAD_URL" | sed -E 's|.*betterbird-([^.]+)\.en-US\.mac.*|\1|')
           elif [[ "${{ matrix.api_url }}" == *"github.com"* ]]; then
             RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.HOMEBREW_BUMP_TOKEN }}" ${{ matrix.api_url }})
             LATEST_VERSION=$(echo "$RESPONSE" | jq -r '.tag_name' | sed 's/v//')
@@ -98,7 +98,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes detected for ${{ matrix.name }}. Skipping commit."
           else
-            git commit -m "Update ${{ matrix.name }} to v$VERSION"
+            git commit -m "fix(${{ matrix.name }}): update to $VERSION"
             git fetch origin master
             git rebase origin/master
             git push origin master
