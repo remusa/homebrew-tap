@@ -35,6 +35,10 @@ jobs:
             file: Casks/betterbird.rb
             url_template_arm64: "https://www.betterbird.eu/downloads/MacDiskImage/betterbird-VERSION.en-US.mac-arm64.dmg"
             url_template_intel: "https://www.betterbird.eu/downloads/MacDiskImage/betterbird-VERSION.en-US.mac.dmg"
+          - name: typewhisper
+            api_url: "https://api.github.com/repos/TypeWhisper/typewhisper-mac/releases/latest"
+            file: Casks/typewhisper.rb
+            url_template: "https://github.com/TypeWhisper/typewhisper-mac/releases/download/vVERSION/TypeWhisper-vVERSION.dmg"
     steps:
       - name: Checkout Tap
         uses: actions/checkout@v5
