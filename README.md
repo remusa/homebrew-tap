@@ -12,3 +12,4 @@
 | openmessage | ![](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fremusa%2Fhomebrew-tap%2Fmaster%2Fversions.json&query=%24.openmessage&label=openmessage) |
 | pythonscad  | ![](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fremusa%2Fhomebrew-tap%2Fmaster%2Fversions.json&query=%24.pythonscad&label=pythonscad)   |
 | shiru       | ![](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fremusa%2Fhomebrew-tap%2Fmaster%2Fversions.json&query=%24.shiru&label=shiru)             |
+| typewhisper | ![](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fremusa%2Fhomebrew-tap%2Fmaster%2Fversions.json&query=%24.typewhisper&label=typewhisper) |
