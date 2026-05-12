@@ -1,6 +1,6 @@
 cask("typewhisper") do
-  version("plugin-qwen3-1.1.0")
-  sha256("0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5")
+  version("1.3.3")
+  sha256("6f21f72b539ce0cfde81d64710cffd615be5f11d0392679317884d280cb92a84")
 
   url(
     "https://github.com/TypeWhisper/typewhisper-mac/releases/download/v#{version}/TypeWhisper-v#{version}.dmg",
