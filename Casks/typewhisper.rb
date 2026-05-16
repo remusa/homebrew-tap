@@ -1,5 +1,5 @@
 cask("typewhisper") do
-  version("plugin-xai-1.0.0")
+  version("plugin-lietranscript-v1.0.10")
   sha256("0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5")
 
   url(
