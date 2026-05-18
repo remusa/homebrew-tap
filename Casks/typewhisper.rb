@@ -1,5 +1,5 @@
 cask("typewhisper") do
-  version("plugin-parakeet-1.2.14")
+  version("plugin-parakeet-1.2.15")
   sha256("0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5")
 
   url(
