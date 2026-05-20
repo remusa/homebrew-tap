@@ -5,5 +5,5 @@
     "openmessage": "0.2.9",
     "pythonscad": "0.20.0",
     "shiru": "6.6.0",
-    "typewhisper": "plugin-granite-1.0.8"
+    "typewhisper": "plugin-openai-compatible-1.0.16"
 }

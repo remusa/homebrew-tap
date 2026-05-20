@@ -1,5 +1,5 @@
 cask("typewhisper") do
-  version("plugin-granite-1.0.8")
+  version("plugin-openai-compatible-1.0.16")
   sha256("0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5")
 
   url(
