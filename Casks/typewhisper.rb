@@ -1,6 +1,6 @@
 cask("typewhisper") do
-  version("1.4.0")
-  sha256("7158c9169f366affcfc235eeac58f14564063f6cf3d1dc602ab5cf09ea8995db")
+  version("plugin-script-1.1.5")
+  sha256("0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5")
 
   url(
     "https://github.com/TypeWhisper/typewhisper-mac/releases/download/v#{version}/TypeWhisper-v#{version}.dmg",
