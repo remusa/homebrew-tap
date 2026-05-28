@@ -3,13 +3,13 @@ cask("betterbird") do
 
   on_arm do
     # Get via: curl -L https://www.betterbird.eu/downloads/MacDiskImage/betterbird-#{version}.en-US.mac-arm64.dmg | shasum -a 256
-    sha256("28e2c9f95a1452b5562b2c5b6dcf6fb93c5a0d825cdc033e6f45a22135909bd0")
+    sha256("35df2df65104cd83af36348eed0023feca110f48bd6a77cfc87845dcf107dd7d")
     url("https://www.betterbird.eu/downloads/MacDiskImage/betterbird-#{version}.en-US.mac-arm64.dmg")
   end
 
   on_intel do
     # Get via: curl -L https://www.betterbird.eu/downloads/MacDiskImage/betterbird-#{version}.en-US.mac.dmg | shasum -a 256
-    sha256("8558bab518101b9ee4bf22f77bd1b001961034e7d0ed163fb4dc26b601e26ea1")
+    sha256("94fb76e1e81bd2488e6c9f93a93f753f0012969ed223c8555e75636d14f480fc")
     url("https://www.betterbird.eu/downloads/MacDiskImage/betterbird-#{version}.en-US.mac.dmg")
   end
 
