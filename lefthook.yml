@@ -1,0 +1,12 @@
+commit-msg:
+  commands:
+    conventional-commits:
+      run: |
+        MSG="$(head -1 .git/COMMIT_EDITMSG)"
+        PATTERN='^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\(.+\))?(!)?: .+'
+        if [[ ! "$MSG" =~ $PATTERN ]]; then
+          echo "ERROR: Commit message must follow Conventional Commits format."
+          echo "Format: <type>(<optional scope>): <description>"
+          echo "Types: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test"
+          exit 1
+        fi
