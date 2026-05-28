@@ -33,6 +33,7 @@ jobs:
           - name: betterbird
             api_url: "https://www.betterbird.eu/downloads/getloc.php?os=mac-arm64&lang=en-US&version=release"
             file: Casks/betterbird.rb
+            dual_arch: true
             url_template_arm64: "https://www.betterbird.eu/downloads/MacDiskImage/betterbird-VERSION.en-US.mac-arm64.dmg"
             url_template_intel: "https://www.betterbird.eu/downloads/MacDiskImage/betterbird-VERSION.en-US.mac.dmg"
           - name: typewhisper
@@ -42,11 +43,13 @@ jobs:
           - name: input-leap
             api_url: "https://api.github.com/repos/input-leap/input-leap/releases/latest"
             file: Casks/input-leap.rb
+            dual_arch: true
             url_template_arm64: "https://github.com/input-leap/input-leap/releases/download/vVERSION/macOS-Apple_Silicon-debug-vVERSION.tar.gz"
             url_template_intel: "https://github.com/input-leap/input-leap/releases/download/vVERSION/macOS-x86_64-debug-vVERSION.tar.gz"
           - name: aerion
             api_url: "https://api.github.com/repos/hkdb/aerion/releases/latest"
             file: Casks/aerion.rb
+            dual_arch: true
             url_template_arm64: "https://github.com/hkdb/aerion/releases/download/vVERSION/Aerion-darwin-arm64.zip"
             url_template_intel: "https://github.com/hkdb/aerion/releases/download/vVERSION/Aerion-darwin-amd64.zip"
     steps:
@@ -57,7 +60,7 @@ jobs:
       - name: Check Version
         id: check
         run: |
-          if [[ "${{ matrix.name }}" == "betterbird" || "${{ matrix.name }}" == "input-leap" || "${{ matrix.name }}" == "aerion" ]]; then
+          if [[ "${{ matrix.dual_arch }}" == "true" ]]; then
             if [[ "${{ matrix.name }}" == "betterbird" ]]; then
               DOWNLOAD_URL=$(curl -s "${{ matrix.api_url }}" | tr -d ' \n')
               LATEST_VERSION=$(echo "$DOWNLOAD_URL" | sed -E 's|.*betterbird-(.*)\.en-US\.mac.*|\1|')
@@ -84,7 +87,7 @@ jobs:
         run: |
           VERSION="${{ steps.check.outputs.version }}"
           echo "Updating ${{ matrix.name }} to v$VERSION..."
-          if [[ "${{ matrix.name }}" == "betterbird" || "${{ matrix.name }}" == "input-leap" || "${{ matrix.name }}" == "aerion" ]]; then
+          if [[ "${{ matrix.dual_arch }}" == "true" ]]; then
             URL_ARM64=$(echo "${{ matrix.url_template_arm64 }}" | sed "s|VERSION|$VERSION|g")
             URL_INTEL=$(echo "${{ matrix.url_template_intel }}" | sed "s|VERSION|$VERSION|g")
             SHA_ARM64=$(curl -L -s "$URL_ARM64" | shasum -a 256 | awk '{print $1}')
