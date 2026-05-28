@@ -1,4 +1,7 @@
 [tools]
+node = "lts"
+python = "3"
+uv = "latest"
 lefthook = "latest"
 yamllint = "latest"
 prettier = "latest"
