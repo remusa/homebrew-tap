@@ -1,6 +1,6 @@
 cask("pythonscad") do
-  version("0.20.0")
-  sha256("3c251c5e9606e05d0d3c9d027b9a60f5d0cf54510a585ad45974530911ff2b47")
+  version("1.0.0")
+  sha256("f85f57253156ba27320332ae1e70192e7564ef0232561ea1c7cbb74dd21f3fdd")
 
   url("https://github.com/pythonscad/pythonscad/releases/download/v#{version}/PythonSCAD-v#{version}.dmg")
   name("PythonSCAD")
