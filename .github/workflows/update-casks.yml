@@ -52,6 +52,10 @@ jobs:
             dual_arch: true
             url_template_arm64: "https://github.com/hkdb/aerion/releases/download/vVERSION/Aerion-darwin-arm64.zip"
             url_template_intel: "https://github.com/hkdb/aerion/releases/download/vVERSION/Aerion-darwin-amd64.zip"
+          - name: bambu-studio-beta
+            api_url: "https://api.github.com/repos/bambulab/BambuStudio/releases?per_page=5"
+            file: Casks/bambu-studio-beta.rb
+            bambu_studio_beta: true
     steps:
       - name: Checkout Tap
         uses: actions/checkout@v5
@@ -60,7 +64,10 @@ jobs:
       - name: Check Version
         id: check
         run: |
-          if [[ "${{ matrix.dual_arch }}" == "true" ]]; then
+          if [[ "${{ matrix.bambu_studio_beta }}" == "true" ]]; then
+            RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.HOMEBREW_BUMP_TOKEN }}" ${{ matrix.api_url }})
+            LATEST_VERSION=$(echo "$RESPONSE" | jq -r '.[] | select(.prerelease == true) | .tag_name' | head -1 | sed 's|v||')
+          elif [[ "${{ matrix.dual_arch }}" == "true" ]]; then
             if [[ "${{ matrix.name }}" == "betterbird" ]]; then
               DOWNLOAD_URL=$(curl -s "${{ matrix.api_url }}" | tr -d ' \n')
               LATEST_VERSION=$(echo "$DOWNLOAD_URL" | sed -E 's|.*betterbird-(.*)\.en-US\.mac.*|\1|')
@@ -87,7 +94,24 @@ jobs:
         run: |
           VERSION="${{ steps.check.outputs.version }}"
           echo "Updating ${{ matrix.name }} to v$VERSION..."
-          if [[ "${{ matrix.dual_arch }}" == "true" ]]; then
+          if [[ "${{ matrix.bambu_studio_beta }}" == "true" ]]; then
+            API_RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.HOMEBREW_BUMP_TOKEN }}" ${{ matrix.api_url }})
+            LATEST_TAG=$(echo "$API_RESPONSE" | jq -r '.[] | select(.prerelease == true) | .tag_name' | head -1)
+            DOWNLOAD_URL=$(echo "$API_RESPONSE" | jq -r --arg tag "$LATEST_TAG" '.[] | select(.tag_name == $tag) | .assets[] | select(.name | test("Bambu_Studio_mac.*\\.dmg")) | .browser_download_url')
+            if [ -z "$DOWNLOAD_URL" ]; then
+              echo "Error: Could not find macOS DMG asset."
+              exit 1
+            fi
+            NEW_SHA=$(curl -L -s "$DOWNLOAD_URL" | shasum -a 256 | awk '{print $1}')
+            if [ -z "$NEW_SHA" ] || [ "$NEW_SHA" == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" ]; then
+              echo "Error: Download failed or file is empty."
+              exit 1
+            fi
+            sed -i '' "s|version(\".*\")|version(\"$VERSION\")|" ${{ matrix.file }}
+            sed -i '' "s|sha256(\".*\")|sha256(\"$NEW_SHA\")|" ${{ matrix.file }}
+            ESCAPED_URL=$(echo "$DOWNLOAD_URL" | sed 's|@|\\@|g')
+            sed -i '' "s@url(\"[^\"]*\")@url(\"$ESCAPED_URL\")@" ${{ matrix.file }}
+          elif [[ "${{ matrix.dual_arch }}" == "true" ]]; then
             URL_ARM64=$(echo "${{ matrix.url_template_arm64 }}" | sed "s|VERSION|$VERSION|g")
             URL_INTEL=$(echo "${{ matrix.url_template_intel }}" | sed "s|VERSION|$VERSION|g")
             SHA_ARM64=$(curl -L -s "$URL_ARM64" | shasum -a 256 | awk '{print $1}')
