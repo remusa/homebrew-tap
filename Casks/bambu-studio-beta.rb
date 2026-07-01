@@ -11,7 +11,7 @@ cask("bambu-studio-beta") do
   desc("PC Software for BambuLab and other 3D printers (beta)")
   homepage("https://github.com/bambulab/BambuStudio")
 
-  app("Bambu Studio.app")
+  app("BambuStudio.app")
 
   zap(
     trash: [
