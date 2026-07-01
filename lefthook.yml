@@ -1,12 +1,38 @@
+pre-commit:
+  parallel: true
+  commands:
+    style:
+      run: brew style {staged_files}
+      glob: "*.rb"
+    yamllint:
+      run: mise exec -- yamllint --no-warnings {staged_files}
+      glob: "*.{yml,yaml}"
+    toml:
+      run: mise exec -- taplo fmt {staged_files}
+      glob: "*.toml"
+    shell:
+      run: mise exec -- shfmt -w {staged_files}
+      glob: "*.sh"
+    markdown:
+      run: npx --yes prettier --write {staged_files}
+      glob: "*.md"
+
 commit-msg:
   commands:
     conventional-commits:
       run: |
-        MSG="$(head -1 .git/COMMIT_EDITMSG)"
-        PATTERN='^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\(.+\))?(!)?: .+'
-        if [[ ! "$MSG" =~ $PATTERN ]]; then
-          echo "ERROR: Commit message must follow Conventional Commits format."
-          echo "Format: <type>(<optional scope>): <description>"
-          echo "Types: build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test"
+        if [ -f ".git/COMMIT_EDITMSG" ]; then
+          MSG=$(cat .git/COMMIT_EDITMSG)
+        elif [ -f ".git/msg" ]; then
+          MSG=$(cat .git/msg)
+        else
+          MSG=""
+        fi
+        if ! echo "$MSG" | grep -qE '^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)'; then
+          echo "Error: Commit message does not follow"
+          echo "conventional commits format."
+          echo "Expected: <type>(<scope>)?<!>?: <description>"
+          echo "Types: build, chore, ci, docs, feat, fix, perf,"
+          echo "refactor, revert, style, test"
           exit 1
         fi
