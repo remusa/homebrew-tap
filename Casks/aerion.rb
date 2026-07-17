@@ -1,5 +1,5 @@
 cask("aerion") do
-  version("0.3.1")
+  version("0.3.2")
 
   on_arm do
     sha256("352744e0c214f22c0d5547cbb6f96b7b10881a34bb7b47e28b0a56518875e214")
