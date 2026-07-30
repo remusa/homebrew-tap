@@ -52,6 +52,11 @@ jobs:
             dual_arch: true
             url_template_arm64: "https://github.com/hkdb/aerion/releases/download/vVERSION/Aerion-darwin-arm64.zip"
             url_template_intel: "https://github.com/hkdb/aerion/releases/download/vVERSION/Aerion-darwin-amd64.zip"
+          - name: futo-notes
+            api_url: "https://gitlab.futo.org/api/v4/projects/futo-notes%2Ffuto-notes/releases?per_page=1"
+            file: Casks/futo-notes.rb
+            url_template: "https://gitlab.futo.org/api/v4/projects/488/packages/generic/futo-notes/VERSION/FUTO-Notes-VERSION-universal.dmg"
+            gitlab: true
           - name: bambu-studio-beta
             api_url: "https://api.github.com/repos/bambulab/BambuStudio/releases?per_page=5"
             file: Casks/bambu-studio-beta.rb
@@ -75,6 +80,9 @@ jobs:
               RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.HOMEBREW_BUMP_TOKEN }}" ${{ matrix.api_url }})
               LATEST_VERSION=$(echo "$RESPONSE" | jq -r '.tag_name' | sed 's|v||')
             fi
+          elif [[ "${{ matrix.gitlab }}" == "true" ]]; then
+            RESPONSE=$(curl -s ${{ matrix.api_url }})
+            LATEST_VERSION=$(echo "$RESPONSE" | jq -r '.[0].tag_name' | sed 's|v||')
           elif [[ "${{ matrix.api_url }}" == *"github.com"* ]]; then
             RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.HOMEBREW_BUMP_TOKEN }}" ${{ matrix.api_url }})
             LATEST_VERSION=$(echo "$RESPONSE" | jq -r '.tag_name' | sed 's|v||')
