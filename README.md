@@ -2,6 +2,15 @@
 
 [![Update Casks](https://github.com/remusa/homebrew-tap/actions/workflows/update-casks.yml/badge.svg)](https://github.com/remusa/homebrew-tap/actions/workflows/update-casks.yml)
 
+Personal [Homebrew](https://brew.sh) tap for macOS apps.
+
+## Usage
+
+```sh
+brew tap remusa/tap
+brew install <cask>
+```
+
 ## Casks
 
 | Cask | Version |
