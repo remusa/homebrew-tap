@@ -50,8 +50,14 @@ Commit all changes:
 
 ```
 git add Casks/<app-name>.rb .github/workflows/update-casks.yml versions.json README.md
-git commit -m "Add <app-name> to tap"
+git commit -m "feat(<app-name>): add to tap"
 ```
+
+## Commit Guidelines
+
+- Always use [conventional commits](https://www.conventionalcommits.org/): `<type>(<scope>): <description>`
+- Types: `feat`, `fix`, `docs`, `chore`, `ci`, `refactor`, `style`, `test`, `perf`, `build`, `revert`
+- Never use `--no-verify` or bypass pre-commit hooks unless explicitly asked by the user.
 
 ## Important Notes
 
