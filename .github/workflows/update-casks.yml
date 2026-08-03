@@ -46,6 +46,10 @@ jobs:
             dual_arch: true
             url_template_arm64: "https://github.com/input-leap/input-leap/releases/download/vVERSION/macOS-Apple_Silicon-debug-vVERSION.tar.gz"
             url_template_intel: "https://github.com/input-leap/input-leap/releases/download/vVERSION/macOS-x86_64-debug-vVERSION.tar.gz"
+          - name: lewitt-control-center
+            api_url: "https://www.lewitt-audio.com/software/cc3-mac/latest"
+            file: Casks/lewitt-control-center.rb
+            lewitt_cc: true
           - name: aerion
             api_url: "https://api.github.com/repos/hkdb/aerion/releases/latest"
             file: Casks/aerion.rb
@@ -83,6 +87,11 @@ jobs:
           elif [[ "${{ matrix.gitlab }}" == "true" ]]; then
             RESPONSE=$(curl -s ${{ matrix.api_url }})
             LATEST_VERSION=$(echo "$RESPONSE" | jq -r '.[0].tag_name' | sed 's|v||')
+          elif [[ "${{ matrix.lewitt_cc }}" == "true" ]]; then
+            curl -sL -o /tmp/lewitt.pkg -A "Homebrew" "${{ matrix.api_url }}"
+            xar -xf /tmp/lewitt.pkg -C /tmp/lewitt-extract
+            LATEST_VERSION=$(grep -o 'pkg-ref.*version="[^"]*"' /tmp/lewitt-extract/Distribution | grep 'LewittInstaller' | sed -E 's/.*version="([^"]*)".*/\1/')
+            rm -rf /tmp/lewitt.pkg /tmp/lewitt-extract
           elif [[ "${{ matrix.api_url }}" == *"github.com"* ]]; then
             RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.HOMEBREW_BUMP_TOKEN }}" ${{ matrix.api_url }})
             LATEST_VERSION=$(echo "$RESPONSE" | jq -r '.tag_name' | sed 's|v||')
@@ -135,6 +144,19 @@ jobs:
             sed -i '' "s|version(\".*\")|version(\"$VERSION\")|" ${{ matrix.file }}
             perl -i '' -0pe "s|(on_arm\s+do.*?sha256\(\")[^\"]*(\")|${1}$SHA_ARM64${2}|s" ${{ matrix.file }}
             perl -i '' -0pe "s|(on_intel\s+do.*?sha256\(\")[^\"]*(\")|${1}$SHA_INTEL${2}|s" ${{ matrix.file }}
+          elif [[ "${{ matrix.lewitt_cc }}" == "true" ]]; then
+            curl -sL -o /tmp/lewitt.pkg -A "Homebrew" "${{ matrix.api_url }}"
+            NEW_SHA=$(shasum -a 256 /tmp/lewitt.pkg | awk '{print $1}')
+            ACTUAL_URL=$(curl -sIL -o /dev/null -w '%{redirect_url}' -A "Homebrew" "${{ matrix.api_url }}")
+            PKG_NAME=$(basename "$ACTUAL_URL")
+            if [ -z "$NEW_SHA" ] || [ "$NEW_SHA" == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" ]; then
+              echo "Error: Download failed or file is empty."
+              exit 1
+            fi
+            sed -i '' "s|version(\".*\")|version(\"$VERSION\")|" ${{ matrix.file }}
+            sed -i '' "s|sha256(\".*\")|sha256(\"$NEW_SHA\")|" ${{ matrix.file }}
+            sed -i '' "s|pkg(\"[^\"]*\")|pkg(\"$PKG_NAME\")|" ${{ matrix.file }}
+            rm -f /tmp/lewitt.pkg
           else
             URL=$(echo "${{ matrix.url_template }}" | sed "s|VERSION|$VERSION|g")
             NEW_SHA=$(curl -L -s "$URL" | shasum -a 256 | awk '{print $1}')
