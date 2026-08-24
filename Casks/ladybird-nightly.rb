@@ -17,6 +17,16 @@ cask 'ladybird-nightly' do
     system_command '/usr/bin/xattr',
                    args: ['-dr', 'com.apple.quarantine', "#{appdir}/Ladybird.app"],
                    sudo: false
+    # ditto resolves symlinks when extracting, but dyld needs versioned
+    # library links (e.g. libfoo.0.dylib -> libfoo.0.1.0.dylib).
+    lib = "#{appdir}/Ladybird.app/Contents/lib"
+    Dir.glob("#{lib}/*.[0-9]*.[0-9]*.dylib").each do |real|
+      base = File.basename(real, '.dylib')
+      name_major = base.sub(/([^.]*\.[0-9]+)\..+$/, '\1')
+      short = "#{lib}/#{name_major}.dylib"
+      next if File.exist?(short)
+      FileUtils.ln_s(File.basename(real), short)
+    end
   end
 
   caveats <<~EOS
