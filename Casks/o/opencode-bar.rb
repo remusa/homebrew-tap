@@ -1,0 +1,27 @@
+cask("opencode-bar") do
+  version("0.0.1")
+
+  on_arm do
+    sha256("nocheck")
+    url("https://github.com/remusa/opencode-bar/releases/download/v#{version}/OpenCodeUsageMonitor-v#{version}.dmg")
+  end
+
+  on_intel do
+    sha256("nocheck")
+    url("https://github.com/remusa/opencode-bar/releases/download/v#{version}/OpenCodeUsageMonitor-v#{version}.dmg")
+  end
+
+  name("OpenCode Bar")
+  desc("Monitor all your AI provider usage from OpenCode in real-time from the macOS menu bar")
+  homepage("https://github.com/remusa/opencode-bar")
+
+  app("OpenCode Bar.app")
+
+  zap(
+    trash: [
+      "~/Library/Application Support/OpenCodeBar",
+      "~/Library/Preferences/com.opencode.bar.plist",
+      "~/Library/Saved Application State/com.opencode.bar.savedState"
+    ]
+  )
+end
