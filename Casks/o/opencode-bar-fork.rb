@@ -2,12 +2,12 @@ cask("opencode-bar-fork") do
   version("0.0.1")
 
   on_arm do
-    sha256("08b2a759130b8922d481503897924a57be86de6da78128c9161623a25361b88e")
+    sha256("0867561bfe06291e143dc8270e47ca5b04fda2098d30a40de8091a26aa6191e0")
     url("https://github.com/remusa/opencode-bar/releases/download/v#{version}/OpenCodeUsageMonitor-v#{version}.dmg")
   end
 
   on_intel do
-    sha256("08b2a759130b8922d481503897924a57be86de6da78128c9161623a25361b88e")
+    sha256("0867561bfe06291e143dc8270e47ca5b04fda2098d30a40de8091a26aa6191e0")
     url("https://github.com/remusa/opencode-bar/releases/download/v#{version}/OpenCodeUsageMonitor-v#{version}.dmg")
   end
 
