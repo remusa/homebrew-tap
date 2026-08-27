@@ -65,6 +65,10 @@ jobs:
             api_url: "https://api.github.com/repos/bambulab/BambuStudio/releases?per_page=5"
             file: Casks/bambu-studio-beta.rb
             bambu_studio_beta: true
+          - name: opencode-bar
+            api_url: "https://api.github.com/repos/remusa/opencode-bar/releases/latest"
+            file: Casks/o/opencode-bar.rb
+            url_template: "https://github.com/remusa/opencode-bar/releases/download/vVERSION/OpenCodeUsageMonitor-vVERSION.dmg"
     steps:
       - name: Checkout Tap
         uses: actions/checkout@v5
