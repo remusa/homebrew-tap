@@ -65,3 +65,13 @@ git commit -m "feat(<app-name>): add to tap"
 - SHA256 can be computed after cask creation using `brew fetch --cask <app-name>`
 - Betterbird uses dual architecture (arm64 + intel) - see existing cask for pattern
 - All four files must be updated together for consistency
+
+## Cross-Repo Conventions
+
+These apply across all repositories (nix-config, nixos-config, ladybird-builds, etc.):
+
+- **Never remove comments** from config files (Nix, YAML, Ruby, etc.)
+- **Preserve all comments** when editing — if unsure, keep it
+- **Never edit configs without asking** — confirm before modifying any config file
+- **Check OpenCode session history** before tackling a problem — similar work may have been done
+  - Sessions DB: `~/.local/share/opencode/opencode.db` (SQLite)

@@ -1,4 +1,4 @@
-cask("opencode-bar") do
+cask("opencode-bar-deepseek") do
   version("0.0.1")
 
   on_arm do
