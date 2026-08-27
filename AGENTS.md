@@ -61,6 +61,7 @@ git commit -m "feat(<app-name>): add to tap"
 
 ## Important Notes
 
+- **Cask names must be unique across all taps.** Check existing taps (especially `opgginc/tap`) for naming conflicts before adding. If a cask with the same name exists upstream, append `-fork` (e.g., `opencode-bar-fork`).
 - Version placeholders should be actual versions when possible
 - SHA256 can be computed after cask creation using `brew fetch --cask <app-name>`
 - Betterbird uses dual architecture (arm64 + intel) - see existing cask for pattern
