@@ -69,6 +69,12 @@ jobs:
             api_url: "https://api.github.com/repos/remusa/opencode-bar/releases/latest"
             file: Casks/o/opencode-bar.rb
             url_template: "https://github.com/remusa/opencode-bar/releases/download/vVERSION/OpenCodeUsageMonitor-vVERSION.dmg"
+          - name: nuvio-desktop
+            api_url: "https://api.github.com/repos/NuvioMedia/NuvioDesktop/releases/latest"
+            file: Casks/nuvio-desktop.rb
+            dual_arch: true
+            url_template_arm64: "https://github.com/NuvioMedia/NuvioDesktop/releases/download/VERSION/Nuvio-macOS-arm64-VERSION.dmg"
+            url_template_intel: "https://github.com/NuvioMedia/NuvioDesktop/releases/download/VERSION/Nuvio-macOS-x86_64-VERSION.dmg"
     steps:
       - name: Checkout Tap
         uses: actions/checkout@v5
