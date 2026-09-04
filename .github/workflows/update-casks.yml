@@ -67,7 +67,7 @@ jobs:
             bambu_studio_beta: true
           - name: opencode-bar
             api_url: "https://api.github.com/repos/remusa/opencode-bar/releases/latest"
-            file: Casks/o/opencode-bar.rb
+            file: Casks/o/opencode-bar-fork.rb
             url_template: "https://github.com/remusa/opencode-bar/releases/download/vVERSION/OpenCodeUsageMonitor-vVERSION.dmg"
           - name: nuvio-desktop
             api_url: "https://api.github.com/repos/NuvioMedia/NuvioDesktop/releases/latest"
@@ -99,6 +99,7 @@ jobs:
             LATEST_VERSION=$(echo "$RESPONSE" | jq -r '.[0].tag_name' | sed 's|v||')
           elif [[ "${{ matrix.lewitt_cc }}" == "true" ]]; then
             curl -sL -o /tmp/lewitt.pkg -A "Homebrew" "${{ matrix.api_url }}"
+            mkdir -p /tmp/lewitt-extract
             xar -xf /tmp/lewitt.pkg -C /tmp/lewitt-extract
             LATEST_VERSION=$(grep -o 'pkg-ref.*version="[^"]*"' /tmp/lewitt-extract/Distribution | grep 'LewittInstaller' | sed -E 's/.*version="([^"]*)".*/\1/')
             rm -rf /tmp/lewitt.pkg /tmp/lewitt-extract
@@ -109,7 +110,7 @@ jobs:
             RESPONSE=$(curl -s ${{ matrix.api_url }})
             LATEST_VERSION=$(echo "$RESPONSE" | jq -r '.tag_name' | sed 's|v||')
           fi
-          CURRENT_VERSION=$(grep 'version "' ${{ matrix.file }} | head -n 1 | cut -d '"' -f 2)
+          CURRENT_VERSION=$(grep 'version("' ${{ matrix.file }} | head -n 1 | sed -E 's/.*version\("([^"]*)"\).*/\1/')
           if [ "$LATEST_VERSION" != "null" ] && [ "$LATEST_VERSION" != "$CURRENT_VERSION" ]; then
             echo "update_needed=true" >> $GITHUB_OUTPUT
             echo "version=$LATEST_VERSION" >> $GITHUB_OUTPUT
