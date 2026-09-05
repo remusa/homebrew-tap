@@ -1,9 +1,17 @@
 pre-commit:
   parallel: true
   commands:
-    style:
-      run: brew style {staged_files}
-      glob: "*.rb"
+    # DISABLED: `brew style` fails with EACCES on
+    # /opt/homebrew/Library/Homebrew/vendor/bundle/ruby/4.0.0/.homebrew_vendor_version
+    # because nix-homebrew pins the entire Homebrew Library to an immutable
+    # nix-store symlink (dr-xr-xr-x root wheel). `brew style` tries to write
+    # a vendor-version marker file there and cannot. Incompatible with
+    # nix-homebrew by design.
+    # Re-enable if Homebrew is moved off nix-homebrew, or run
+    # `brew style Casks/<file>.rb` manually before committing.
+    # style:
+    #   run: brew style {staged_files}
+    #   glob: "*.rb"
     yamllint:
       run: mise exec -- yamllint --no-warnings {staged_files}
       glob: "*.{yml,yaml}"

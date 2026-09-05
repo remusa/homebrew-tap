@@ -46,6 +46,10 @@ jobs:
             dual_arch: true
             url_template_arm64: "https://github.com/input-leap/input-leap/releases/download/vVERSION/macOS-Apple_Silicon-debug-vVERSION.tar.gz"
             url_template_intel: "https://github.com/input-leap/input-leap/releases/download/vVERSION/macOS-x86_64-debug-vVERSION.tar.gz"
+          - name: launchy
+            api_url: "https://api.github.com/repos/Punshnut/macos-launchy/releases/latest"
+            file: Casks/launchy.rb
+            url_template: "https://github.com/Punshnut/macos-launchy/releases/download/vVERSION/Launchy.dmg"
           - name: lewitt-control-center
             api_url: "https://www.lewitt-audio.com/software/cc3-mac/latest"
             file: Casks/lewitt-control-center.rb
