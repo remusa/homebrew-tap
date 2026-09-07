@@ -18,6 +18,10 @@
 # NOTE: upstream GitHub 1.x archives currently 404 (only the appcast
 # lists them). Version-matching hosts never re-download, but a fresh
 # install would fail until upstream restores the asset.
+#
+# Upstream 2.0 notes say macOS 14/15 users "stay on 1.3.0-beta.1", but that
+# beta's archive is also 404 upstream (verified 2026-09). Pin stays at the
+# installed 1.2.0; if a downloadable stable 1.x appears, bump to it.
 cask("thaw") do
   version "1.2.0"
   sha256 "d67f4d31ef9fa057849a98540b810cfa42e0bc66019d3605abd08e45c69aa06f"
