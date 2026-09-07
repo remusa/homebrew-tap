@@ -15,18 +15,18 @@
 #     appcast below and is scoped to compatible 1.x), verify download,
 #     then `nix flake update remusa-homebrew-tap` in nix-config.
 #
-# NOTE: upstream GitHub 1.x archives currently 404 (only the appcast
-# lists them). Version-matching hosts never re-download, but a fresh
-# install would fail until upstream restores the asset.
+# NOTE: upstream GitHub 1.x archives are gone (only the appcast lists them,
+# and those URLs 404). This tap now HOSTS the 1.2.0 archive in its own GitHub
+# release (tag 1.2.0) so fresh installs on macOS < Tahoe work.
 #
 # Upstream 2.0 notes say macOS 14/15 users "stay on 1.3.0-beta.1", but that
 # beta's archive is also 404 upstream (verified 2026-09). Pin stays at the
 # installed 1.2.0; if a downloadable stable 1.x appears, bump to it.
 cask("thaw") do
   version "1.2.0"
-  sha256 "d67f4d31ef9fa057849a98540b810cfa42e0bc66019d3605abd08e45c69aa06f"
+  sha256 "99fdacde2c110e1fd8c43ff754c5f4d207aaf6ef6524d9d289ba1b2ac48a9e3c"
 
-  url "https://github.com/thaw-app/Thaw/releases/download/2.0.0-rc.1/Thaw_#{version}.zip"
+  url "https://github.com/remusa/homebrew-tap/releases/download/1.2.0/Thaw_#{version}.zip"
 
   name "Thaw"
   desc "Menu bar manager"
