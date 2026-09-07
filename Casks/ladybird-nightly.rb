@@ -8,7 +8,7 @@ cask 'ladybird-nightly' do
   homepage 'https://ladybird.org'
 
   depends_on arch: :arm64
-  depends_on macos: '>= :sonoma'
+  depends_on macos: :sonoma
 
   app 'Ladybird.app'
 
