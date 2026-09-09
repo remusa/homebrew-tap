@@ -1,6 +1,6 @@
 cask("bambu-studio-beta") do
-  version("02.08.01.55")
-  sha256("17eca4d63b909c728bf6d0cf8753397820f15b372e1ce69d6ab71be796a3af0d")
+  version("02.08.03.66")
+  sha256("d948aa9001685c2ecb3ff1cabb146e6cf1b5ec5114fbd4b2b4419293367ee468")
 
   url(
     "https://github.com/bambulab/BambuStudio/releases/download/v#{version}/Bambu_Studio_mac-v02.08.00.50-20260625193201.dmg",
