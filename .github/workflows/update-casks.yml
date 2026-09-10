@@ -69,10 +69,6 @@ jobs:
             api_url: "https://api.github.com/repos/bambulab/BambuStudio/releases?per_page=5"
             file: Casks/bambu-studio-beta.rb
             bambu_studio_beta: true
-          - name: opencode-bar
-            api_url: "https://api.github.com/repos/remusa/opencode-bar/releases/latest"
-            file: Casks/o/opencode-bar-fork.rb
-            url_template: "https://github.com/remusa/opencode-bar/releases/download/vVERSION/OpenCodeUsageMonitor-vVERSION.dmg"
           - name: nuvio-desktop
             api_url: "https://api.github.com/repos/NuvioMedia/NuvioDesktop/releases/latest"
             file: Casks/nuvio-desktop.rb
