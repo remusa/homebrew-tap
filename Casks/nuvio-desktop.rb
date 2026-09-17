@@ -1,5 +1,5 @@
 cask("nuvio-desktop") do
-  version("0.1.23-alpha")
+  version("0.1.24-alpha")
 
   on_arm do
     sha256("02a3b3da70963da71f5c59d084ae241f95a43683da951ab8a6a40267ae3e0b48")
