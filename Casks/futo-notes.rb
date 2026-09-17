@@ -1,6 +1,6 @@
 cask("futo-notes") do
-  version("1.7.1")
-  sha256("049bfc3995f4af1efe68236e2f8126f7bdfefa23d26ad07bade0647235a3ca0d")
+  version("")
+  sha256("9491d4737000e80bcbdd7a39e9dc13c2178ff865beff7d800d6159bfc395e8fa")
 
   url("https://gitlab.futo.org/api/v4/projects/488/packages/generic/futo-notes/v#{version}/FUTO-Notes-#{version}-universal.dmg",
       verified: "gitlab.futo.org")
