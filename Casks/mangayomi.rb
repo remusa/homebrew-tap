@@ -1,6 +1,6 @@
 cask("mangayomi") do
-  version("0.9.6")
-  sha256("9627244a8e08629d95567ba4a17bc15fed7eb38db38981c90d81b3d0d8119a12")
+  version("0.9.7")
+  sha256("f1a7020e2d2393b9d817ba8dfca1147666d283aed7d43aa0258695d8ef20cc32")
 
   url("https://github.com/kodjodevf/mangayomi/releases/download/v#{version}/Mangayomi-v#{version}-macos.dmg")
   name("Mangayomi")
