@@ -3,7 +3,7 @@ cask("bambu-studio-beta") do
   sha256("6d0099f60bb4449ee9066160cb65a8a1f639650a3f48cddf13566fe0c520ac66")
 
   url(
-    "https://github.com/bambulab/BambuStudio/releases/download/v#{version}/Bambu_Studio_mac-v02.08.00.50-20260625193201.dmg",
+    "https://github.com/bambulab/BambuStudio/releases/download/v#{version}/Bambu_Studio_mac_v02.08.04.57-20260922164607.dmg",
     verified: "github.com/bambulab/BambuStudio/"
   )
 
