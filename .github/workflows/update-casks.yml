@@ -143,10 +143,12 @@ jobs:
               echo "Error: Download failed or file is empty."
               exit 1
             fi
-            sed -i '' "s|version(\".*\")|version(\"$VERSION\")|" ${{ matrix.file }}
-            sed -i '' "s|sha256(\".*\")|sha256(\"$NEW_SHA\")|" ${{ matrix.file }}
-            ESCAPED_URL=$(echo "$DOWNLOAD_URL" | sed 's|@|\\@|g')
-            sed -i '' "s@url(\"[^\"]*\")@url(\"$ESCAPED_URL\")@" ${{ matrix.file }}
+          # Version/sha/url edits go through the shared script: `sed` patterns
+          # that expect `sha256("...")` / `url("...")` on one line silently
+          # match nothing when a cask wraps them or passes `verified:` (that is
+          # how bambu's version moved while its url stayed on the old asset).
+          python3 .github/scripts/verify-cask-shas.py set ${{ matrix.file }} \
+            --version "$VERSION" --sha "$NEW_SHA" --url "$DOWNLOAD_URL"
           elif [[ "${{ matrix.dual_arch }}" == "true" ]]; then
             URL_ARM64=$(echo "${{ matrix.url_template_arm64 }}" | sed "s|VERSION|$VERSION|g")
             URL_INTEL=$(echo "${{ matrix.url_template_intel }}" | sed "s|VERSION|$VERSION|g")
@@ -160,9 +162,8 @@ jobs:
               echo "Error: intel download failed or file is empty."
               exit 1
             fi
-            sed -i '' "s|version(\".*\")|version(\"$VERSION\")|" ${{ matrix.file }}
-            perl -i '' -0pe "s|(on_arm\s+do.*?sha256\(\")[^\"]*(\")|${1}$SHA_ARM64${2}|s" ${{ matrix.file }}
-            perl -i '' -0pe "s|(on_intel\s+do.*?sha256\(\")[^\"]*(\")|${1}$SHA_INTEL${2}|s" ${{ matrix.file }}
+            python3 .github/scripts/verify-cask-shas.py set ${{ matrix.file }} \
+              --version "$VERSION" --sha "$SHA_ARM64" --sha-intel "$SHA_INTEL"
           elif [[ "${{ matrix.lewitt_cc }}" == "true" ]]; then
             curl -sL -o /tmp/lewitt.pkg -A "Homebrew" "${{ matrix.api_url }}"
             NEW_SHA=$(shasum -a 256 /tmp/lewitt.pkg | awk '{print $1}')
@@ -172,8 +173,10 @@ jobs:
               echo "Error: Download failed or file is empty."
               exit 1
             fi
-            sed -i '' "s|version(\".*\")|version(\"$VERSION\")|" ${{ matrix.file }}
-            sed -i '' "s|sha256(\".*\")|sha256(\"$NEW_SHA\")|" ${{ matrix.file }}
+            # `pkg` is its own stanza the script does not model, and this cask
+            # writes it on one line — the sed stays; everything else moves to set.
+            python3 .github/scripts/verify-cask-shas.py set ${{ matrix.file }} \
+              --version "$VERSION" --sha "$NEW_SHA"
             sed -i '' "s|pkg(\"[^\"]*\")|pkg(\"$PKG_NAME\")|" ${{ matrix.file }}
             rm -f /tmp/lewitt.pkg
           else
@@ -183,8 +186,8 @@ jobs:
               echo "Error: Download failed or file is empty."
               exit 1
             fi
-            sed -i '' "s|version(\".*\")|version(\"$VERSION\")|" ${{ matrix.file }}
-            sed -i '' "s|sha256(\".*\")|sha256(\"$NEW_SHA\")|" ${{ matrix.file }}
+            python3 .github/scripts/verify-cask-shas.py set ${{ matrix.file }} \
+              --version "$VERSION" --sha "$NEW_SHA"
           fi
           sed -i '' "s|\"${{ matrix.name }}\": \"[^\"]*\"|\"${{ matrix.name }}\": \"$VERSION\"|" versions.json
           git config user.name "GitHub Actions"
