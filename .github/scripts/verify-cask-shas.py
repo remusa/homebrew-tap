@@ -26,6 +26,10 @@ What it refuses to do, so it can never corrupt a cask:
 
 The pairing is positional: casks list the arm64 block then the intel block, each
 with its own sha256 and url, so the Nth sha pairs with the Nth asset URL.
+
+`set` exists because update-casks.yml used to rewrite version/sha/url with
+`sed` patterns that assumed single-line, no-`verified:` call syntax — see that
+function's docstring for the two real failures that caused.
 """
 
 from __future__ import annotations
@@ -168,6 +172,63 @@ def cmd_verify(path: str, apply: bool) -> int:
     return 0
 
 
+def cmd_set(path: str, version: str | None, sha: str | None,
+            sha_intel: str | None, url: str | None) -> int:
+    """Rewrite a cask's version / sha256 / url regardless of formatting.
+
+    update-casks.yml used `sed 's|sha256(\".*\")|...|'` and
+    `sed 's@url(\"[^\"]*\")@...@'`, which silently match nothing when the cask
+    wraps those calls over several lines or passes `verified:`. Two real
+    failures came from that: librewolf's `sha256(\n "..."\n)` was never
+    re-hashed on a bump, and bambu-studio-beta's version moved while its url
+    stayed on the old asset, so the cask 404'd. This does the rewrite on the
+    parsed value instead, so formatting cannot defeat it.
+    """
+    src = open(path, encoding="utf-8").read()
+    replacements: list[tuple[int, int, str]] = []
+
+    if version:
+        match = VERSION_RE.search(src)
+        if not match:
+            print(f"{path}: no literal version to set")
+            return 1
+        replacements.append((match.start(1), match.end(1), version))
+
+    if url:
+        match = URL_RE.search(src)
+        if not match:
+            print(f"{path}: no url literal to set")
+            return 1
+        replacements.append((match.start(1), match.end(1), url))
+
+    sha_values = [sha] if sha else []
+    if sha_intel:
+        sha_values.append(sha_intel)
+    for index, value in enumerate(sha_values):
+        matches = list(SHA_RE.finditer(src))
+        if len(matches) <= index:
+            print(f"{path}: no sha256 #{index + 1} to set")
+            return 1
+        match = matches[index]
+        replacements.append((match.start(1), match.end(1), value))
+
+    if not replacements:
+        print(f"{path}: nothing to set")
+        return 1
+
+    # Apply in reverse so earlier offsets stay valid.
+    for start, end, value in sorted(replacements, reverse=True):
+        src = src[:start] + value + src[end:]
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write(src)
+    print(f"{os.path.basename(path)}: set " + ", ".join(
+        filter(None, [f"version={version}" if version else None,
+                      f"url={url}" if url else None,
+                      f"sha256={sha}" if sha else None,
+                      f"sha256_intel={sha_intel}" if sha_intel else None])))
+    return 0
+
+
 def main(argv: list[str]) -> int:
     if len(argv) < 2:
         print(__doc__)
@@ -177,6 +238,19 @@ def main(argv: list[str]) -> int:
         return cmd_discover()
     if command == "verify" and len(argv) >= 3:
         return cmd_verify(argv[2], apply="--apply" in argv[3:])
+    if command == "set" and len(argv) >= 3:
+        flags = argv[3:]
+        values = {}
+        for flag in ("--version", "--sha", "--sha-intel", "--url"):
+            if flag in flags:
+                values[flag] = flags[flags.index(flag) + 1]
+        return cmd_set(
+            argv[2],
+            values.get("--version"),
+            values.get("--sha"),
+            values.get("--sha-intel"),
+            values.get("--url"),
+        )
     print(f"unknown arguments: {' '.join(argv[1:])}")
     return 2
 
