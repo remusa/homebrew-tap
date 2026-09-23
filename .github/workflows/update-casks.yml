@@ -3,6 +3,14 @@ on:
   schedule:
     - cron: "0 0 * * *"
   workflow_dispatch:
+
+# Share one group with verify-cask-shas.yml: both commit to master with the same
+# token, and this job only fires on a version CHANGE while that one re-hashes
+# same-version re-uploads — the two can overlap and race the push.
+concurrency:
+  group: cask-updates
+  cancel-in-progress: false
+
 jobs:
   update-apps:
     runs-on: macos-latest

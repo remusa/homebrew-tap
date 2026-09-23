@@ -1,34 +1,60 @@
 name: Verify Cask SHAs
+
+# Re-pins cask sha256 values whose upstream artifact was rebuilt under the SAME
+# version tag (nuvio-desktop and aerion have both done this). `update-casks.yml`
+# cannot catch it: that job only commits when the upstream version CHANGES, so a
+# same-tag re-upload leaves a stale sha behind and `brew bundle` fails with
+# "Cask reports different checksum" until someone re-hashes by hand.
+#
+# The previous safety net kept a hand-written matrix of affected casks. It
+# duplicated update-casks.yml, drifted from it, and skipped every cask that was
+# not listed. Now the cask files are the only source of truth (see
+# .github/scripts/verify-cask-shas.py), so a new cask is covered the moment it
+# lands and there is no second list to keep in sync:
+#   * `sha256 :no_check` (nightly builds) and `version :latest` casks are skipped
+#   * non-asset URLs (GitHub `releases/latest`, landing pages) are ignored
+#   * a cask is only rewritten when sha256 count == asset URL count, so the
+#     positional pairing is unambiguous
+#   * failed or empty downloads never produce a rewrite
+#
+# Runs daily rather than weekly: a same-version re-upload has no other trigger,
+# and the daily cadence shrinks the broken-install window from a week to a day.
 on:
   schedule:
-    # Weekly: Monday at 04:00 UTC
-    - cron: "0 4 * * 1"
+    # Daily at 04:00 UTC.
+    - cron: "0 4 * * *"
   workflow_dispatch:
 
+# Share one group with update-casks.yml so the two never race on `git push`
+# (both commit to master with the same token).
+concurrency:
+  group: cask-updates
+  cancel-in-progress: false
+
 jobs:
+  discover:
+    runs-on: macos-latest
+    outputs:
+      matrix: ${{ steps.find.outputs.matrix }}
+      count: ${{ steps.find.outputs.count }}
+    steps:
+      - name: Checkout Tap
+        uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.HOMEBREW_BUMP_TOKEN }}
+
+      - name: Discover casks with pinned SHAs
+        id: find
+        run: python3 .github/scripts/verify-cask-shas.py discover
+
   verify-shas:
+    needs: discover
+    if: needs.discover.outputs.count != '0'
     runs-on: macos-latest
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          # dual_arch casks that are rebuilt upstream without version bumps
-          - name: nuvio-desktop
-            file: Casks/nuvio-desktop.rb
-            url_template_arm64: "https://github.com/NuvioMedia/NuvioDesktop/releases/download/VERSION/Nuvio-macOS-arm64-VERSION.dmg"
-            url_template_intel: "https://github.com/NuvioMedia/NuvioDesktop/releases/download/VERSION/Nuvio-macOS-x86_64-VERSION.dmg"
-          - name: aerion
-            file: Casks/aerion.rb
-            url_template_arm64: "https://github.com/hkdb/aerion/releases/download/vVERSION/Aerion-darwin-arm64.zip"
-            url_template_intel: "https://github.com/hkdb/aerion/releases/download/vVERSION/Aerion-darwin-amd64.zip"
-          - name: input-leap
-            file: Casks/input-leap.rb
-            url_template_arm64: "https://github.com/input-leap/input-leap/releases/download/vVERSION/macOS-Apple_Silicon-debug-vVERSION.tar.gz"
-            url_template_intel: "https://github.com/input-leap/input-leap/releases/download/vVERSION/macOS-x86_64-debug-vVERSION.tar.gz"
-          - name: betterbird
-            file: Casks/betterbird.rb
-            url_template_arm64: "https://www.betterbird.eu/downloads/MacDiskImage/betterbird-VERSION.en-US.mac-arm64.dmg"
-            url_template_intel: "https://www.betterbird.eu/downloads/MacDiskImage/betterbird-VERSION.en-US.mac.dmg"
+      # One runner per cask keeps a single slow upstream from hiding the others.
+      matrix: ${{ fromJSON(needs.discover.outputs.matrix) }}
     steps:
       - name: Checkout Tap
         uses: actions/checkout@v5
@@ -36,60 +62,21 @@ jobs:
           token: ${{ secrets.HOMEBREW_BUMP_TOKEN }}
 
       - name: Verify and fix SHA
+        id: verify
+        run: python3 .github/scripts/verify-cask-shas.py verify "${{ matrix.file }}" --apply
+
+      - name: Commit and push
+        if: steps.verify.outputs.changed == 'true'
         run: |
-          VERSION=$(grep 'version("' ${{ matrix.file }} | head -n 1 | sed -E 's/.*version\("([^"]*)"\).*/\1/')
-          echo "Checking ${{ matrix.name }} v$VERSION..."
-
-          URL_ARM64=$(echo "${{ matrix.url_template_arm64 }}" | sed "s|VERSION|$VERSION|g")
-          URL_INTEL=$(echo "${{ matrix.url_template_intel }}" | sed "s|VERSION|$VERSION|g")
-
-          # Download and hash
-          SHA_ARM64=$(curl -L -s "$URL_ARM64" | shasum -a 256 | awk '{print $1}')
-          SHA_INTEL=$(curl -L -s "$URL_INTEL" | shasum -a 256 | awk '{print $1}')
-
-          # Validate downloads
-          EMPTY_SHA="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-          if [ -z "$SHA_ARM64" ] || [ "$SHA_ARM64" == "$EMPTY_SHA" ]; then
-            echo "Error: arm64 download failed or file is empty."
-            exit 1
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          # Only the cask this job verified — never a blanket `git add`.
+          git add "${{ matrix.file }}"
+          if git diff --cached --quiet; then
+            echo "Nothing staged for ${{ matrix.name }}. Skipping commit."
+            exit 0
           fi
-          if [ -z "$SHA_INTEL" ] || [ "$SHA_INTEL" == "$EMPTY_SHA" ]; then
-            echo "Error: intel download failed or file is empty."
-            exit 1
-          fi
-
-          # Extract current SHAs from cask file
-          CURRENT_ARM64=$(perl -0777 -ne 'if (/on_arm\s+do\s+sha256\("([^"]+)"\)/s) { print $1 }' ${{ matrix.file }})
-          CURRENT_INTEL=$(perl -0777 -ne 'if (/on_intel\s+do\s+sha256\("([^"]+)"\)/s) { print $1 }' ${{ matrix.file }})
-
-          CHANGED=false
-
-          if [ "$SHA_ARM64" != "$CURRENT_ARM64" ]; then
-            echo "arm64 SHA mismatch: $CURRENT_ARM64 -> $SHA_ARM64"
-            perl -i '' -0pe "s|(on_arm\s+do.*?sha256\(\")[^\"]*(\")|${1}$SHA_ARM64${2}|s" ${{ matrix.file }}
-            CHANGED=true
-          else
-            echo "arm64 SHA OK: $SHA_ARM64"
-          fi
-
-          if [ "$SHA_INTEL" != "$CURRENT_INTEL" ]; then
-            echo "intel SHA mismatch: $CURRENT_INTEL -> $SHA_INTEL"
-            perl -i '' -0pe "s|(on_intel\s+do.*?sha256\(\")[^\"]*(\")|${1}$SHA_INTEL${2}|s" ${{ matrix.file }}
-            CHANGED=true
-          else
-            echo "intel SHA OK: $SHA_INTEL"
-          fi
-
-          if [ "$CHANGED" = true ]; then
-            git config user.name "GitHub Actions"
-            git config user.email "actions@github.com"
-            git add ${{ matrix.file }}
-            git commit -m "fix(${{ matrix.name }}): update SHA (rebuilt upstream)"
-            git fetch origin master
-            git rebase origin/master
-            git push origin master
-            echo "updated=true" >> $GITHUB_OUTPUT
-          else
-            echo "All SHAs match. No changes needed."
-            echo "updated=false" >> $GITHUB_OUTPUT
-          fi
+          git commit -m "fix(${{ matrix.name }}): update SHA (rebuilt upstream)"
+          git fetch origin master
+          git rebase origin/master
+          git push origin master
