@@ -54,3 +54,6 @@ build-iPhoneSimulator/
 
 # Used by RuboCop. Remote config files pulled in from inherit_from directive.
 # .rubocop-https?--*
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
