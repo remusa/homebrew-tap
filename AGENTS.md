@@ -29,7 +29,7 @@ Edit `.github/workflows/update-casks.yml`:
 That entry is only for **version bumps**. SHA re-pinning needs no entry here:
 `.github/workflows/verify-cask-shas.yml` runs daily and discovers every cask on
 its own (via `.github/scripts/verify-cask-shas.py`), because an upstream that
-rebuilds its artifact under the *same* version tag leaves a stale sha256 with no
+rebuilds its artifact under the _same_ version tag leaves a stale sha256 with no
 version change for this job to notice. To stay covered, keep the cask's
 `url("…")` lines literal and asset-shaped (that script reads them), and use
 `sha256 :no_check` for builds that legitimately change on every download
