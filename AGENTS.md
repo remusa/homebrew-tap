@@ -26,6 +26,15 @@ Edit `.github/workflows/update-casks.yml`:
   - `url_template`: download URL with VERSION placeholder
   - For dual-arch apps: `url_template_arm64` and `url_template_intel`
 
+That entry is only for **version bumps**. SHA re-pinning needs no entry here:
+`.github/workflows/verify-cask-shas.yml` runs daily and discovers every cask on
+its own (via `.github/scripts/verify-cask-shas.py`), because an upstream that
+rebuilds its artifact under the *same* version tag leaves a stale sha256 with no
+version change for this job to notice. To stay covered, keep the cask's
+`url("…")` lines literal and asset-shaped (that script reads them), and use
+`sha256 :no_check` for builds that legitimately change on every download
+(nightlies) — that exempts the cask from the check.
+
 ### 3. Update versions.json
 
 Add entry to `versions.json`:
