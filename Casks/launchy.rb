@@ -1,6 +1,6 @@
 cask("launchy") do
-  version("2026.7.0")
-  sha256("85f65c4ba2c181c4b5a74562dba91578496017bb6fda798891f4f514a6544573")
+  version("2026.8.0")
+  sha256("f84e868ba63e3fa83af5fe607c7eaaea9d39b9d86772e1b18e044105fa7e6b4e")
 
   url(
     "https://github.com/Punshnut/macos-launchy/releases/download/v#{version}/Launchy.dmg",
