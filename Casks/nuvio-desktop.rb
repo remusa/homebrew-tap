@@ -1,13 +1,13 @@
 cask("nuvio-desktop") do
-  version("0.1.27-alpha")
+  version("0.1.29-alpha")
 
   on_arm do
-    sha256("6f3b57bda493bc39cf8666affa0d6c8fcfc07686958a741938a7210e532780a6")
+    sha256("0d8992627cf9779f1d5f1ffab573b4a73cb89d8741b9eeea3095560acb8d86a5")
     url("https://github.com/NuvioMedia/NuvioDesktop/releases/download/#{version}/Nuvio-macOS-arm64-#{version}.dmg")
   end
 
   on_intel do
-    sha256("701e3376b4e947371c5085917635327a34e2d768d56747f9209c965e5acd0b9d")
+    sha256("f5f7b3df7d448adbb3c0b35481d2e7e21928643c951088aede7aabd9ffb03c8a")
     url("https://github.com/NuvioMedia/NuvioDesktop/releases/download/#{version}/Nuvio-macOS-x86_64-#{version}.dmg")
   end
 
