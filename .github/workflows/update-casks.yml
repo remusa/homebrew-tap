@@ -83,6 +83,10 @@ jobs:
             dual_arch: true
             url_template_arm64: "https://github.com/NuvioMedia/NuvioDesktop/releases/download/VERSION/Nuvio-macOS-arm64-VERSION.dmg"
             url_template_intel: "https://github.com/NuvioMedia/NuvioDesktop/releases/download/VERSION/Nuvio-macOS-x86_64-VERSION.dmg"
+          - name: debrify
+            api_url: "https://api.github.com/repos/varunsalian/debrify/releases/latest"
+            file: Casks/debrify.rb
+            url_template: "https://github.com/varunsalian/debrify/releases/download/vVERSION/debrify-vVERSION.dmg"
     steps:
       - name: Checkout Tap
         uses: actions/checkout@v5
