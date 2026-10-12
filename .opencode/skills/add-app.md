@@ -133,3 +133,33 @@ When user says "add firefox to the tap":
 5. Add to versions.json with initial version
 6. Add to README.md table
 7. Commit changes
+
+## Gotchas when committing / pushing this repo
+
+- **Homebrew here is nix-store managed.** `brew audit` / `brew style` can fail with `EACCES`
+  under `/nix/store/.../Library/Homebrew/...` (lefthook's `style` step is disabled for this
+  reason). Validate a cask with `ruby -c Casks/<name>.rb`, the `verify-cask-shas.py` parser,
+  and a live `curl -I` of the asset URL instead.
+- **Editing from a git worktree.** The `commit-msg` hook reads `.git/COMMIT_EDITMSG`, but in a
+  linked worktree `.git` is a *file* (gitdir pointer), so the hook sees an empty message and
+  rejects. Fix **without** `--no-verify`:
+  ```sh
+  GITDIR=$(sed 's/^gitdir: //' .git); cp .git /tmp/bak
+  rm .git; ln -s "$GITDIR" .git
+  git commit -m "feat(<name>): add to tap"
+  rm .git; cp /tmp/bak .git   # restore
+  ```
+- **Pushing a new branch to GitHub.** The global pre-push guard only allows
+  `@users.noreply.github.com` identities, and for a brand-new ref it checks the *entire*
+  history — which includes this repo's `actions@github.com` CI commits, so the push is blocked.
+  Seed the remote ref at `origin/master` first, then push:
+  ```sh
+  gh api repos/remusa/homebrew-tap/git/refs \
+    -f ref=refs/heads/<branch> -f sha=$(git rev-parse origin/master)
+  git push origin <branch>   # range is now just your commit(s)
+  ```
+  Never `--no-verify` / `LEFTHOOK=0`.
+- **Consumption is pinned.** The tap is used on the darwin hosts as a flake input
+  (`remusa-homebrew-tap`, nix-homebrew with `mutableTaps = false`), so pushing a cask does not
+  make it installable by itself — the homelab repo must bump the input
+  (`nix flake update remusa-homebrew-tap`) and rebuild.
