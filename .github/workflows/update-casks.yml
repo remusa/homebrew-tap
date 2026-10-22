@@ -48,6 +48,12 @@ jobs:
             api_url: "https://api.github.com/repos/TypeWhisper/typewhisper-mac/releases/latest"
             file: Casks/typewhisper.rb
             url_template: "https://github.com/TypeWhisper/typewhisper-mac/releases/download/vVERSION/TypeWhisper-vVERSION.dmg"
+          - name: netbird-gui
+            api_url: "https://api.github.com/repos/netbirdio/netbird/releases/latest"
+            file: Casks/netbird-gui.rb
+            dual_arch: true
+            url_template_arm64: "https://github.com/netbirdio/netbird/releases/download/vVERSION/netbird-ui_VERSION_darwin_arm64_signed.zip"
+            url_template_intel: "https://github.com/netbirdio/netbird/releases/download/vVERSION/netbird-ui_VERSION_darwin_amd64_signed.zip"
           - name: input-leap
             api_url: "https://api.github.com/repos/input-leap/input-leap/releases/latest"
             file: Casks/input-leap.rb
