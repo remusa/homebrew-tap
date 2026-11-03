@@ -1,13 +1,13 @@
 cask("aerion") do
-  version("0.3.5")
+  version("0.3.6")
 
   on_arm do
-    sha256("0d2e01dd0505b13edfc287290c57322859a7fcc79f8a142dff94c6baebea7490")
+    sha256("9bb613d402bdf5b8beeea65926dc2c13bb379003c08dfd138bd0750ba3aae767")
     url("https://github.com/hkdb/aerion/releases/download/v#{version}/Aerion-darwin-arm64.zip")
   end
 
   on_intel do
-    sha256("07cd3581d5d56d3d91d71936ae875acd944c32c80cb1102f8ca3def3f300edff")
+    sha256("800beac959a66d3e31c4af1157618b4dc6b65ce40899f99d456d0163fbeb93ea")
     url("https://github.com/hkdb/aerion/releases/download/v#{version}/Aerion-darwin-amd64.zip")
   end
 
