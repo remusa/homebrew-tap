@@ -1,0 +1,8 @@
+version: 2
+updates:
+  # Keep the workflow action pins current. Cask versions are handled by
+  # .github/workflows/update-casks.yml, so no other ecosystem is listed here.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
