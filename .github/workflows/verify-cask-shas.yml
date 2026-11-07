@@ -39,7 +39,7 @@ jobs:
       count: ${{ steps.find.outputs.count }}
     steps:
       - name: Checkout Tap
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           token: ${{ secrets.HOMEBREW_BUMP_TOKEN }}
 
@@ -57,7 +57,7 @@ jobs:
       matrix: ${{ fromJSON(needs.discover.outputs.matrix) }}
     steps:
       - name: Checkout Tap
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           token: ${{ secrets.HOMEBREW_BUMP_TOKEN }}
 

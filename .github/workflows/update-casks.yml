@@ -95,7 +95,7 @@ jobs:
             url_template: "https://github.com/varunsalian/debrify/releases/download/vVERSION/debrify-vVERSION.dmg"
     steps:
       - name: Checkout Tap
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           token: ${{ secrets.HOMEBREW_BUMP_TOKEN }}
       - name: Check Version
