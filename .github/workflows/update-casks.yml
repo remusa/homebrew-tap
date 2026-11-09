@@ -34,10 +34,22 @@ jobs:
             api_url: "https://api.github.com/repos/MaxGhenis/openmessage/releases/latest"
             file: Casks/openmessage.rb
             url_template: "https://github.com/MaxGhenis/openmessage/releases/download/vVERSION/OpenMessage.dmg"
-          - name: pythonscad
-            api_url: "https://api.github.com/repos/pythonscad/pythonscad/releases/latest"
-            file: Casks/pythonscad.rb
-            url_template: "https://github.com/pythonscad/pythonscad/releases/download/vVERSION/PythonSCAD-vVERSION.dmg"
+          # pythonscad: DISABLED while the cask is pinned to a re-hosted upstream
+          # master build (see the long note in Casks/pythonscad.rb). Re-enabling it
+          # now would be actively harmful: this job compares versions by plain
+          # string inequality, so upstream's released "1.1.2" would be seen as a
+          # change from our "1.1.2-606-gf64848c73" and it would rewrite url/version
+          # back to the released v1.1.2 DMG — the one that segfaults on launch
+          # because it still bundles mimalloc 3.4.0. That breakage is what the
+          # re-host exists to avoid.
+          #
+          # Restore this entry, and the upstream url_template, together with the
+          # cask revert once upstream ships a release containing PR #999 (1.2.0).
+          #
+          # - name: pythonscad
+          #   api_url: "https://api.github.com/repos/pythonscad/pythonscad/releases/latest"
+          #   file: Casks/pythonscad.rb
+          #   url_template: "https://github.com/pythonscad/pythonscad/releases/download/vVERSION/PythonSCAD-vVERSION.dmg"
           - name: betterbird
             api_url: "https://www.betterbird.eu/downloads/getloc.php?os=mac-arm64&lang=en-US&version=release"
             file: Casks/betterbird.rb
