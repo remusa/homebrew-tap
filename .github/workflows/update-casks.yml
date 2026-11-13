@@ -76,6 +76,10 @@ jobs:
             api_url: "https://api.github.com/repos/Punshnut/macos-launchy/releases/latest"
             file: Casks/launchy.rb
             url_template: "https://github.com/Punshnut/macos-launchy/releases/download/vVERSION/Launchy.dmg"
+          - name: mornye
+            api_url: "https://api.github.com/repos/mornyeapp/Mornye-Desktop/releases/latest"
+            file: Casks/mornye.rb
+            url_template: "https://github.com/mornyeapp/Mornye-Desktop/releases/download/vVERSION/Mornye-vVERSION-macos-universal.dmg"
           - name: lewitt-control-center
             api_url: "https://www.lewitt-audio.com/software/cc3-mac/latest"
             file: Casks/lewitt-control-center.rb
