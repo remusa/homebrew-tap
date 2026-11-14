@@ -26,14 +26,14 @@
 # Bumping: change version + both sha256s from the upstream release assets.
 # `brew livecheck --cask remusa/tap/netbird-gui` reports what upstream has.
 cask "netbird-gui" do
-  version "0.82.1"
+  version "0.83.1"
 
   if Hardware::CPU.intel?
     url "https://github.com/netbirdio/netbird/releases/download/v0.81.3/netbird-ui_0.81.3_darwin_amd64_signed.zip"
-    sha256 "0ac46b7e2d1d6b0ec987212ed8b3bcde23976f2efb5539ac1ebc0d8052ecee06"
+    sha256 "0c2ca84ae0b7552a44663899988c9c9883141052f26af6e54e5baf790a7b3dd3"
   else
     url "https://github.com/netbirdio/netbird/releases/download/v0.81.3/netbird-ui_0.81.3_darwin_arm64_signed.zip"
-    sha256 "690a266cfb15367973707f0616f0d1a9691ce026cd346ad4e4225e680e9a99a1"
+    sha256 "78c0af998b54b96f5cac3e2dc78e3ebfe1e8d59062a1587fd8224d9aae006c27"
   end
 
   name "Netbird GUI"
