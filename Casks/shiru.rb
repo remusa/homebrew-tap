@@ -1,6 +1,6 @@
 cask("shiru") do
-  version("6.10.0")
-  sha256("2574ecd237ea3bce18f55599a1b168ad45acd44b138f460f37272ad5a72de5e0")
+  version("6.10.1")
+  sha256("a083c9ceb9a840aacd75fcb9cb03851aa6f11469860b851029747c8f880c421d")
 
   url("https://github.com/RockinChaos/Shiru/releases/download/v#{version}/mac-Shiru-v#{version}.dmg")
   name("Shiru")
