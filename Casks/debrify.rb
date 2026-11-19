@@ -1,7 +1,7 @@
 cask("debrify") do
-  version("0.10.0-beta.1")
+  version("0.11.0-beta.1")
   # Get via: curl -L [URL] | shasum -a 256
-  sha256("cfe95aa9d384c905d5ec08cdd4982c863b40672c081dbf50085d6534ea8be57e")
+  sha256("d6918307b7799c2278f3d368b041abc77ffe00763bda937f7db71f7ca9742cac")
 
   # One universal .dmg (x86_64 + arm64 in the same Mach-O), so no on_arm/on_intel split.
   url("https://github.com/varunsalian/debrify/releases/download/v#{version}/debrify-v#{version}.dmg")
