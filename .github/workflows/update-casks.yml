@@ -34,6 +34,10 @@ jobs:
             api_url: "https://api.github.com/repos/MaxGhenis/openmessage/releases/latest"
             file: Casks/openmessage.rb
             url_template: "https://github.com/MaxGhenis/openmessage/releases/download/vVERSION/OpenMessage.dmg"
+          - name: orcaslicer
+            api_url: "https://api.github.com/repos/OrcaSlicer/OrcaSlicer/releases/latest"
+            file: Casks/orcaslicer.rb
+            url_template: "https://github.com/OrcaSlicer/OrcaSlicer/releases/download/vVERSION/OrcaSlicer_Mac_universal_VVERSION.dmg"
           # pythonscad: DISABLED while the cask is pinned to a re-hosted upstream
           # master build (see the long note in Casks/pythonscad.rb). Re-enabling it
           # now would be actively harmful: this job compares versions by plain
