@@ -1,8 +1,8 @@
 cask("librewolf") do
-  version("160.0.1-1")
+  version("161.0-1")
   # Get via: curl -L [URL] | shasum -a 256
   sha256(
-    "63fecdaff40925486c1c5023c651b61a0858e49847ea338a64d6e47d517f774c"
+    "5f5116de8b28eab07ddece340f10c47af7b898eeee1e229440e35388518fb9ad"
   )
 
   url(
