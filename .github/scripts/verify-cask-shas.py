@@ -94,7 +94,19 @@ def skippable(parsed: dict) -> str | None:
 def download_sha(url: str) -> str | None:
     """sha256 of the body at url, or None when the download is unusable."""
     result = subprocess.run(
-        ["curl", "-fsSL", "--retry", "3", url], capture_output=True
+        # Bounded and retried on every error class: a 155 MB GitHub release
+        # asset (pythonscad) hung the runner for ~16 min because --retry alone
+        # does not cover http2 stream errors and nothing capped the transfer.
+        [
+            "curl", "-fsSL",
+            "--retry", "5",
+            "--retry-all-errors",
+            "--retry-delay", "5",
+            "--connect-timeout", "20",
+            "--max-time", "600",
+            url,
+        ],
+        capture_output=True,
     )
     if result.returncode != 0:
         print(f"    download failed (curl exit {result.returncode})")
